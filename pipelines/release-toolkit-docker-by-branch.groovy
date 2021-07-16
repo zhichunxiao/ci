@@ -74,7 +74,7 @@ def release_one(repo) {
         ]
         build job: "docker-common",
                 wait: true,
-                parameters: paramsDocker
+                parameters: paramsDockerLightning
         }
 }
 
