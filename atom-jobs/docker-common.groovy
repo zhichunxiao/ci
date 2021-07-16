@@ -113,7 +113,7 @@ if (params.ARCH == "arm64") {
 def images = params.RELEASE_DOCKER_IMAGES.split(",")
 def release_images() {
     for (item in images) {
-       if item.startsWith("pingcap/") {
+       if (item.startsWith("pingcap/")) {
            docker.withRegistry("", "dockerhub") {
                sh """
                doker tag ${imagePlaceHolder} ${item}
@@ -121,7 +121,7 @@ def release_images() {
                """
            }
        }
-       if item.startsWith("hub.pingcap.net/") {
+       if (item.startsWith("hub.pingcap.net/")) {
            docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
                sh """
                doker tag ${imagePlaceHolder} ${item}
@@ -129,7 +129,7 @@ def release_images() {
                """
            }
        }
-       if item.startsWith("uhub.service.ucloud.cn/") {
+       if (item.startsWith("uhub.service.ucloud.cn/")) {
            docker.withRegistry("https://uhub.service.ucloud.cn", "ucloud-registry") {
                sh """
                doker tag ${imagePlaceHolder} ${item}
