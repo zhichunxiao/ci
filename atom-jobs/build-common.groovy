@@ -392,7 +392,7 @@ rm -rf ${TARGET}
 mkdir ${TARGET}
 """
 
-def package() {
+def packageBinary() {
     sh """
     tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz ${TARGET}
     curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
@@ -405,7 +405,7 @@ def release() {
     withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
         sh buildsh[params.PRODUCT]
     }
-    package()
+    packageBinary()
 }
 
 
