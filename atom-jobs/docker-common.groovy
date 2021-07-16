@@ -21,7 +21,7 @@ properties([
                 ),
                 string(
                         defaultValue: '',
-                        name: 'OUTPUT_BINARY',
+                        name: 'INPUT_BINARYS',
                         trim: true
                 ),
                 string(
