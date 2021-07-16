@@ -100,17 +100,14 @@ if (PRODUCT == "monitoring" ) {
 def build_image() {
     // 如果构建脚本被定义了，使用定义的构建脚本
     if (buildImgagesh.containsKey(PRODUCT)) {
-        docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
-            sh buildImgagesh[PRODUCT]
-        }
+        sh buildImgagesh[PRODUCT]
     } else { // 如果没定义，使用默认构建脚本
-    docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
-            sh """
-            cp output/bin/* ./
-            curl -o Dockerfile ${DOCKERFILE}
-            docker build  -t ${imagePlaceHolder} .
-            """
-        }
+        sh """
+        cp /usr/local/go/lib/time/zoneinfo.zip ./
+        cp output/bin/* ./
+        curl -o Dockerfile ${DOCKERFILE}
+        docker build  -t ${imagePlaceHolder} .
+        """
     }
 }
 
