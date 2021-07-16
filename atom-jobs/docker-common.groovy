@@ -79,7 +79,7 @@ docker build pingcap/tidb-monitor-initializer .
 """
 
 // 构建出的镜像名称
-def imagePlaceHolder = "placeholder"
+imagePlaceHolder = "placeholder"
 // 使用非默认脚本构建镜像，构建出的镜像名称需要在下面定义 
 if (PRODUCT == "tics" ) {
     if (RELEASE_TAG.length() > 1) {
