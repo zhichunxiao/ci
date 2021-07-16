@@ -3,6 +3,20 @@
 * @FORCE_REBUILD(bool:if force rebuild binary,default true,Optional)
 */
 
+properties([
+        parameters([
+                string(
+                        defaultValue: '',
+                        name: 'GIT_BRANCH',
+                        trim: true
+                ),
+                booleanParam(
+                        defaultValue: false,
+                        name: 'FORCE_REBUILD'
+                )
+        ])
+])
+
 def get_sha(repo) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${GIT_BRANCH} -s=${FILE_SERVER_URL}").trim()
