@@ -100,20 +100,24 @@ if (PRODUCT == "monitoring" ) {
 def build_image() {
     // 如果构建脚本被定义了，使用定义的构建脚本
     if (buildImgagesh.containsKey(PRODUCT)) {
-        sh buildImgagesh[PRODUCT]
+        docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
+            sh buildImgagesh[PRODUCT]
+        }
     } else { // 如果没定义，使用默认构建脚本
-        sh """
-        cp output/bin/* ./
-        curl -o Dockerfile ${DOCKERFILE}
-        docker build  -t ${imagePlaceHolder} .
-        """
+    docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
+            sh """
+            cp output/bin/* ./
+            curl -o Dockerfile ${DOCKERFILE}
+            docker build  -t ${imagePlaceHolder} .
+            """
+        }
     }
 }
 
 
 
 def nodeLabel = "delivery"
-def containerLabel = "golang"
+def containerLabel = "delivery"
 if (params.ARCH == "arm64") {
     nodeLabel = "arm"
     containerLabel = ""
