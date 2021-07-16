@@ -41,6 +41,12 @@ properties([
                 ),
                 string(
                         defaultValue: '',
+                        name: 'DOCKERFILE',
+                        trim: true
+                ),
+                
+                string(
+                        defaultValue: '',
                         name: 'RELEASE_DOCKER_IMAGES',
                         trim: true
                 )
@@ -52,15 +58,15 @@ if (params.PRODUCT.length() <= 1) {
 }
 
 // download binarys
-def binarys = params.INPUT_BINARYS.split(",")
+binarys = params.INPUT_BINARYS.split(",")
 def download() {
-    for (item in images) {
+    for (item in binarys) {
         sh "curl ${FILE_SERVER_URL}/download/${item} | tar xz"
     }
 }
 
 // 定义非默认的构建镜像脚本
-def buildImgagesh = [:]
+buildImgagesh = [:]
 buildImgagesh["tics"] = """
 if [ ${RELEASE_TAG} == "" ];then  
     while ! make image_tiflash_ci ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
@@ -110,7 +116,7 @@ if (params.ARCH == "arm64") {
     containerLabel = ""
 }
 
-def images = params.RELEASE_DOCKER_IMAGES.split(",")
+images = params.RELEASE_DOCKER_IMAGES.split(",")
 def release_images() {
     for (item in images) {
        if (item.startsWith("pingcap/")) {
