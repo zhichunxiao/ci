@@ -1,7 +1,9 @@
 /*
 * @OUTPUT_BINARY(string:binary url on fileserver, transfer througth atom jobs,Required)
-* @PRODUCT(string:product name,eg tidb-binlog,Required)
-* @ARCH(enumerate:linux-arm64,linux-amd64,darwin-arm64,Required)
+* @REPO(string:repo name,eg tidb, Required)
+* @PRODUCT(string:product name,eg tidb-ctl,if not set,default was the same as repo name, Optional)
+* @ARCH(enumerate:arm64,amd64,Required)
+* @OS(enumerate:linux,darwin,Required)
 * @GIT_HASH(string:to get correct code from github,Required)
 * @GIT_PR(string:generate ref head to pre get code from pr,Optional)
 * @RELEASE_TAG(string:for release workflow,what tag to release,Optional)
@@ -10,9 +12,67 @@
 * @EDITION(enumerate:,community,enterprise,Required)
 */
 
+properties([
+        parameters([
+                choice(
+                        choices: ['arm64', 'amd64'],
+                        name: 'ARCH'
+                ),
+                choice(
+                        choices: ['linux', 'darwin'],
+                        name: 'OS'
+                ),
+                choice(
+                        choices: ['community', 'enterprise'],
+                        name: 'EDITION'
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'OUTPUT_BINARY',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'REPO',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'PRODUCT',
+                        trim: true,
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'GIT_HASH',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'GIT_PR',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'RELEASE_TAG',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'TARGET_BRANCH',
+                        trim: true
+                ),
+                bool(
+                        defaultValue: flase,
+                        name: 'FORCE_REBUILD'
+                )
+        ])
+])
+
+if (params.PRODUCT.length() <= 1) {
+    PRODUCT = REPO
+}
 
 // check if binary already has been built. 
-
 def ifFileCacheExists() {
     if (params.FORCE_REBUILD){
         return false
@@ -26,9 +86,12 @@ def ifFileCacheExists() {
     return false
 }
 // if has built,skip build.
-if ifFileCacheExists() {
-    return
+node {
+    if ifFileCacheExists() {
+        return
+    }
 }
+
 
 // choose which go version to use. 
 def boolean needUpgradeGoVersion(String tag,String branch) {
@@ -60,7 +123,7 @@ if (params.PRODUCT == "tics") {
     nodeLabel = "build_tiflash"
     containerLabel = "tiflash"
 } 
-if (params.ARCH == "linux-arm64") {
+if (params.ARCH == "arm64") {
     nodeLabel = "arm"
     containerLabel = ""
     if (params.PRODUCT == "tiflash"){
@@ -68,19 +131,15 @@ if (params.ARCH == "linux-arm64") {
         containerLabel = "tiflash"
     }
 }
-if (params.ARCH == "darwin-amd64") {
+if (params.OS == "darwin") {
     nodeLabel = "mac"
     containerLabel = ""
-    if (params.PRODUCT == "tiflash"){
-        nodeLabel = "mac-i5"
-        containerLabel = ""
-    }
 }
 
 // define git url and git ref.
-def repo = "git@github.com:pingcap/${PRODUCT}.git"
-if (repo == "tikv" || repo == "importer" || repo == "pd") {
-    repo = "git@github.com:tikv/${PRODUCT}.git"
+def repo = "git@github.com:pingcap/${REPO}.git"
+if (REPO == "tikv" || REPO == "importer" || REPO == "pd") {
+    repo = "git@github.com:tikv/${REPO}.git"
 }
 def specRef = "+refs/heads/*:refs/remotes/origin/*"
 if (params.GIT_PR.length() >= 1) {
@@ -97,6 +156,7 @@ def checkoutCode() {
                         userRemoteConfigs: [[credentialsId: 'github-sre-bot-ssh',
                                             refspec      : "${specRef}",
                                             url          : "${repo}"]]]
+    sh "git checkout ${GIT_HASH}"
 }
 
 
@@ -104,7 +164,7 @@ def checkoutCode() {
 def TARGET = "output" 
 def buildsh = [:]
 buildsh["tidb-ctl"] = """
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 go build -o binarys/${PRODUCT}
@@ -118,20 +178,40 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${EDITION} == "enterprise"]; then
+    export TIDB_EDITION=Enterprise
+fi;
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 make clean
 git checkout .
-
-if [ ${EDITION} == "enterprise"]; then
-    export TIDB_EDITION=Enterprise
+if [ ${ARCH} == "amd64" ]; then
+    WITH_RACE=1 make && mv bin/tidb-server bin/tidb-server-race
+    git checkout .
+    WITH_CHECK=1 make && mv bin/tidb-server bin/tidb-server-check
+    git checkout .
+    make failpoint-enable && make server && mv bin/tidb-server{,-failpoint} && make failpoint-disable
+    git checkout .
+    make server_coverage || true
+    git checkout .
+    if [ \$(grep -E "^ddltest:" Makefile) ]; then
+        git checkout .
+        GOPATH=${ws}/go make ddltest
+    fi
+        
+    if [ \$(grep -E "^importer:" Makefile) ]; then
+        git checkout .
+        GOPATH=${ws}/go make importer
+    fi
+else 
+    make 
 fi;
-make
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
 cp binarys/tidb-ctl ${TARGET}/bin/
-cp bin/* ${TARGET}/bin/   
+cp bin/* ${TARGET}/bin/ 
+
 """
 
 buildsh["tidb-binlog"] = """
@@ -139,7 +219,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 make clean
@@ -155,7 +235,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 git checkout .
@@ -174,7 +254,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 make clean
@@ -189,7 +269,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 make build
@@ -203,7 +283,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 make build
@@ -217,7 +297,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} != "linux-amd64" ]; then
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
     export PATH=${GO_BIN_PATH}:$PATH
 fi;
 make build
@@ -234,7 +314,7 @@ git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${EDITION} == "enterprise"]; then
     export TIFLASH_EDITION=Enterprise
 fi;
-if [ ${ARCH} == "darwin-amd64" ]; then
+if [ ${ARCH} == "amd64" ]; then
     mkdir -p release-darwin/build/
     [ -f "release-darwin/build/build-release.sh" ] || curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/tiflash/build-release.sh > release-darwin/build/build-release.sh
     [ -f "release-darwin/build/build-cluster-manager.sh" ] || curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/tiflash/build-cluster-manager.sh > release-darwin/build/build-cluster-manager.sh
@@ -243,19 +323,18 @@ if [ ${ARCH} == "darwin-amd64" ]; then
     chmod +x release-darwin/build/*
     ./release-darwin/build/build-release.sh
     ls -l ./release-darwin/tiflash/
-    cd release-darwin/
+    mv release-darwin ${target}
 else
     NPROC=12 release-centos7/build/build-release.sh
-    cd release-centos7/
+    mv release-centos7 ${target}
 fi
-mv tiflash ${TARGET}
 """
 
 buildsh["tikv"] = """
 for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+-b refs/tags/${RELEASE_TAG}
 if [ ${EDITION} == "enterprise"]; then
     TIKV_EDITION=Enterprise CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 ROCKSDB_SYS_SSE=0 make dist_release
 else;
@@ -278,6 +357,41 @@ mkdir -p ${TARGET}/bin
 cp target/release/tikv-importer ${TARGET}/bin
 """
 
+buildsh["monitoring"] = """
+if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+    export PATH=${GO_BIN_PATH}:$PATH
+fi;
+go build -o pull-monitoring  cmd/monitoring.go
+./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=$TOKEN
+rm -rf ${TARGET}
+mkdir -p ${TARGET}
+mv monitor-snapshot/${RELEASE_TAG}/operator ${TARGET}
+"""
+
+buildsh["enterprise-plugin"] = """
+rsync -av --progress ./ ./enterprise-plugin --exclude enterprise-plugin
+git clone https://github.com/pingcap/tidb.git --depth=1
+cd tidb/cmd/pluginpkg
+go build 
+cd ../../..
+filepath_whitelist = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/whitelist-1.so"
+md5path_whitelist = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/whitelist-1.so.md5"
+filepath_audit = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so"
+md5path_audit = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so.md5"
+go mod tidy
+tidb/cmd/pluginpkg/pluginpkg -pkg-dir whitelist -out-dir whitelist
+md5sum whitelist-1.so > whitelist-1.so.md5
+curl -F ${md5path_whitelist}=@whitelist-1.so.md5 ${FILE_SERVER_URL}/upload
+curl -F ${filepath_whitelist}=@whitelist-1.so ${FILE_SERVER_URL}/upload
+go mod tidy
+tidb/cmd/pluginpkg/pluginpkg -pkg-dir enterprise-plugin/audit -out-dir enterprise-plugin/audit
+md5sum audit-1.so > audit-1.so.md5
+curl -F ${md5path_audit}=@audit-1.so.md5 ${FILE_SERVER_URL}/upload
+curl -F ${filepath_audit}=@audit-1.so ${FILE_SERVER_URL}/upload
+rm -rf ${TARGET}
+mkdir ${TARGET}
+"""
+
 def package() {
     sh """
     tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz ${TARGET}
@@ -287,7 +401,10 @@ def package() {
 
 def release() {
     checkoutCode()
-    sh buildsh[params.PRODUCT]
+    // some build need this token.
+    withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
+        sh buildsh[params.PRODUCT]
+    }
     package()
 }
 
