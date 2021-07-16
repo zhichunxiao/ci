@@ -79,13 +79,15 @@ def release_one(repo) {
 }
 
 stage ("release") {
-    node{
-        releaseRepos = ["dumpling","br","ticdc","tidb-binlog"]
-        builds = [:]
-        for (item in releaseRepos) {
-            release_one(item)
+    node("${GO_BUILD_SLAVE}") {
+        container("golang") {
+            releaseRepos = ["dumpling","br","ticdc","tidb-binlog"]
+            builds = [:]
+            for (item in releaseRepos) {
+                release_one(item)
+            }
+            parallel builds
         }
-        parallel builds
     }
 }
 
