@@ -87,7 +87,7 @@ def ifFileCacheExists() {
 }
 // if has built,skip build.
 node {
-    if ifFileCacheExists() {
+    if (ifFileCacheExists()) {
         return
     }
 }
