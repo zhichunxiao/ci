@@ -61,7 +61,7 @@ properties([
                         name: 'TARGET_BRANCH',
                         trim: true
                 ),
-                bool(
+                booleanParam(
                         defaultValue: false,
                         name: 'FORCE_REBUILD'
                 )
