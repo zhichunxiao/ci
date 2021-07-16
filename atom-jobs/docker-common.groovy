@@ -53,6 +53,9 @@ properties([
         ])
 ])
 
+env.DOCKER_HOST = "tcp://localhost:2375"
+env.DOCKER_REGISTRY = "docker.io"
+
 if (params.PRODUCT.length() <= 1) {
     PRODUCT = REPO
 }
@@ -101,7 +104,7 @@ def build_image() {
     } else { // 如果没定义，使用默认构建脚本
         sh """
         cp output/bin/* ./
-        curl -O Dockerfile ${DOCKERFILE}
+        curl -o Dockerfile ${DOCKERFILE}
         docker build  -t ${imagePlaceHolder} .
         """
     }
@@ -122,7 +125,7 @@ def release_images() {
        if (item.startsWith("pingcap/")) {
            docker.withRegistry("", "dockerhub") {
                sh """
-               doker tag ${imagePlaceHolder} ${item}
+               docker tag ${imagePlaceHolder} ${item}
                docker push ${item}
                """
            }
@@ -130,7 +133,7 @@ def release_images() {
        if (item.startsWith("hub.pingcap.net/")) {
            docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
                sh """
-               doker tag ${imagePlaceHolder} ${item}
+               docker tag ${imagePlaceHolder} ${item}
                docker push ${item}
                """
            }
@@ -138,7 +141,7 @@ def release_images() {
        if (item.startsWith("uhub.service.ucloud.cn/")) {
            docker.withRegistry("https://uhub.service.ucloud.cn", "ucloud-registry") {
                sh """
-               doker tag ${imagePlaceHolder} ${item}
+               docker tag ${imagePlaceHolder} ${item}
                docker push ${item}
                """
            }
