@@ -109,7 +109,7 @@ def goBuildPod = "${GO_BUILD_SLAVE}"
 def GO_BIN_PATH = "/usr/local/go/bin"
 if (needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH)) {
    goBuildPod = "${GO1160_BUILD_SLAVE}"
-   GO_BIN_PATH = "/usr/local/go/bin"
+   GO_BIN_PATH = "/usr/local/go1.16.4/bin"
 }
 
 // choose which node to use.
@@ -137,11 +137,11 @@ if (params.OS == "darwin") {
 }
 
 // define git url and git ref.
-def repo = "git@github.com:pingcap/${REPO}.git"
+repo = "git@github.com:pingcap/${REPO}.git"
 if (REPO == "tikv" || REPO == "importer" || REPO == "pd") {
     repo = "git@github.com:tikv/${REPO}.git"
 }
-def specRef = "+refs/heads/*:refs/remotes/origin/*"
+specRef = "+refs/heads/*:refs/remotes/origin/*"
 if (params.GIT_PR.length() >= 1) {
    specRef = "+refs/pull/${GIT_PR}/*:refs/remotes/origin/pr/${GIT_PR}/*"
 }
@@ -154,18 +154,18 @@ def checkoutCode() {
                                     [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, trackingSubmodules: false, reference: ''],
                                     [$class: 'CleanBeforeCheckout']], submoduleCfg: [],
                         userRemoteConfigs: [[credentialsId: 'github-sre-bot-ssh',
-                                            refspec      : "${specRef}",
-                                            url          : "${repo}"]]]
+                                            refspec      : specRef,
+                                            url          : repo]]]
     sh "git checkout ${GIT_HASH}"
 }
 
 
 // define build script here.
-def TARGET = "output" 
-def buildsh = [:]
+TARGET = "output" 
+buildsh = [:]
 buildsh["tidb-ctl"] = """
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 go build -o binarys/${PRODUCT}
 rm -rf ${TARGET}
@@ -182,7 +182,7 @@ if [ ${EDITION} == "enterprise"]; then
     export TIDB_EDITION=Enterprise
 fi;
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
 git checkout .
@@ -197,12 +197,12 @@ if [ ${ARCH} == "amd64" ]; then
     git checkout .
     if [ \$(grep -E "^ddltest:" Makefile) ]; then
         git checkout .
-        GOPATH=${ws}/go make ddltest
+        make ddltest
     fi
         
     if [ \$(grep -E "^importer:" Makefile) ]; then
         git checkout .
-        GOPATH=${ws}/go make importer
+        make importer
     fi
 else 
     make 
@@ -220,7 +220,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
 git checkout .
@@ -236,7 +236,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 git checkout .
 if [ ${EDITION} == "enterprise"]; then
@@ -255,7 +255,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
 make build
@@ -270,7 +270,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
 rm -rf ${TARGET}
@@ -284,7 +284,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
 rm -rf ${TARGET}
@@ -298,7 +298,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
 rm -rf ${TARGET}
@@ -323,10 +323,10 @@ if [ ${ARCH} == "amd64" ]; then
     chmod +x release-darwin/build/*
     ./release-darwin/build/build-release.sh
     ls -l ./release-darwin/tiflash/
-    mv release-darwin ${target}
+    mv release-darwin ${TARGET}
 else
     NPROC=12 release-centos7/build/build-release.sh
-    mv release-centos7 ${target}
+    mv release-centos7 ${TARGET}
 fi
 """
 
@@ -359,10 +359,10 @@ cp target/release/tikv-importer ${TARGET}/bin
 
 buildsh["monitoring"] = """
 if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
-    export PATH=${GO_BIN_PATH}:$PATH
+    export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 go build -o pull-monitoring  cmd/monitoring.go
-./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=$TOKEN
+./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=${env.TOKEN}
 rm -rf ${TARGET}
 mkdir -p ${TARGET}
 mv monitor-snapshot/${RELEASE_TAG}/operator ${TARGET}
@@ -374,20 +374,16 @@ git clone https://github.com/pingcap/tidb.git --depth=1
 cd tidb/cmd/pluginpkg
 go build 
 cd ../../..
-filepath_whitelist = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/whitelist-1.so"
-md5path_whitelist = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/whitelist-1.so.md5"
-filepath_audit = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so"
-md5path_audit = "builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so.md5"
 go mod tidy
 tidb/cmd/pluginpkg/pluginpkg -pkg-dir whitelist -out-dir whitelist
 md5sum whitelist-1.so > whitelist-1.so.md5
-curl -F ${md5path_whitelist}=@whitelist-1.so.md5 ${FILE_SERVER_URL}/upload
-curl -F ${filepath_whitelist}=@whitelist-1.so ${FILE_SERVER_URL}/upload
+curl -F builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/whitelist-1.so.md5=@whitelist-1.so.md5 ${FILE_SERVER_URL}/upload
+curl -F builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/whitelist-1.so=@whitelist-1.so ${FILE_SERVER_URL}/upload
 go mod tidy
 tidb/cmd/pluginpkg/pluginpkg -pkg-dir enterprise-plugin/audit -out-dir enterprise-plugin/audit
 md5sum audit-1.so > audit-1.so.md5
-curl -F ${md5path_audit}=@audit-1.so.md5 ${FILE_SERVER_URL}/upload
-curl -F ${filepath_audit}=@audit-1.so ${FILE_SERVER_URL}/upload
+curl -F builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so.md5=@audit-1.so.md5 ${FILE_SERVER_URL}/upload
+curl -F builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so=@audit-1.so ${FILE_SERVER_URL}/upload
 rm -rf ${TARGET}
 mkdir ${TARGET}
 """
