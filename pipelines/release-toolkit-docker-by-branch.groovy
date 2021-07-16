@@ -82,13 +82,14 @@ stage ("release") {
     node("${GO_BUILD_SLAVE}") {
         container("golang") {
             releaseRepos = ["dumpling","br","ticdc","tidb-binlog"]
-            builds = [:]
+            // builds = [:]
             for (item in releaseRepos) {
-                builds["build ${item}"] = {
-                    release_one(item)
-                }
+                // builds["build ${item}"] = {
+                //     release_one(item)
+                // }
+                release_one(item)
             }
-            parallel builds
+            // parallel builds
         }
     }
 }
