@@ -43,7 +43,7 @@ def release_one(repo) {
             wait: true,
             parameters: paramsBuild
 
-    dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repos}"
+    dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
     image = "hub.pingcap.net/guoyu/${repo}:${RELEASE_TAG}"
     def paramsDocker = [
         string(name: "ARCH", value: "amd64"),
@@ -84,7 +84,9 @@ stage ("release") {
             releaseRepos = ["dumpling","br","ticdc","tidb-binlog"]
             builds = [:]
             for (item in releaseRepos) {
-                release_one(item)
+                builds["build ${item}"] = {
+                    release_one(item)
+                }
             }
             parallel builds
         }
