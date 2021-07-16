@@ -12,7 +12,7 @@ RELEASE_TAG = "${GIT_BRANCH}-nightly"
 
 def release_one(repo) {
     sha1 =  get_sha(repo)
-    binaryURL = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/${linux-amd64}/${repo}.tar.gz"
+    binaryURL = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
     def paramsBuild = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
