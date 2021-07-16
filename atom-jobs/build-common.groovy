@@ -62,7 +62,7 @@ properties([
                         trim: true
                 ),
                 bool(
-                        defaultValue: flase,
+                        defaultValue: false,
                         name: 'FORCE_REBUILD'
                 )
         ])
