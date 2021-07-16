@@ -107,7 +107,7 @@ def boolean needUpgradeGoVersion(String tag,String branch) {
 }
 def goBuildPod = "${GO_BUILD_SLAVE}"
 def goBinPath = "/usr/local/go/bin"
-if needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH) {
+if (needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH)) {
    goBuildPod = "${GO1160_BUILD_SLAVE}"
    goBinPath = "/usr/local/go/bin"
 }
