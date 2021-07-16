@@ -113,7 +113,7 @@ def build_image() {
 
 
 def nodeLabel = "delivery"
-def containerLabel = "delivery"
+def containerLabel = "golang"
 if (params.ARCH == "arm64") {
     nodeLabel = "arm"
     containerLabel = ""
