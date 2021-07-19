@@ -84,8 +84,8 @@ stage ("release") {
             releaseRepos = ["dumpling","br","ticdc","tidb-binlog"]
             builds = [:]
             for (item in releaseRepos) {
+                def product = "${item}"
                 builds["build ${item}"] = {
-                    def product = "${item}"
                     release_one(product)
                 }
             }
