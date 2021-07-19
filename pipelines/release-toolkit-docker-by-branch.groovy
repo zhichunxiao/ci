@@ -25,13 +25,13 @@ def get_sha(repo) {
 RELEASE_TAG = "${GIT_BRANCH}-nightly"
 
 def release_one(repo) {
-    sha1 =  get_sha(repo)
-    binaryURL = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+    def sha1 =  get_sha(repo)
+    def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
     def paramsBuild = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
         string(name: "EDITION", value: "community"),
-        string(name: "OUTPUT_BINARY", value: binaryURL),
+        string(name: "OUTPUT_BINARY", value: binary),
         string(name: "REPO", value: repo),
         string(name: "PRODUCT", value: repo),
         string(name: "GIT_HASH", value: sha1),
@@ -43,12 +43,12 @@ def release_one(repo) {
             wait: true,
             parameters: paramsBuild
 
-    dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
-    image = "hub.pingcap.net/guoyu/${repo}:${RELEASE_TAG}"
+    def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
+    def image = "hub.pingcap.net/guoyu/${repo}:${RELEASE_TAG}"
     def paramsDocker = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
-        string(name: "INPUT_BINARYS", value: binaryURL),
+        string(name: "INPUT_BINARYS", value: binary),
         string(name: "REPO", value: repo),
         string(name: "PRODUCT", value: repo),
         string(name: "RELEASE_TAG", value: RELEASE_TAG),
@@ -60,12 +60,12 @@ def release_one(repo) {
             parameters: paramsDocker
 
     if (repo == "br") {
-        dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
-        imageLightling = "hub.pingcap.net/guoyu/lightning:${RELEASE_TAG}"
+        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
+        def imageLightling = "hub.pingcap.net/guoyu/lightning:${RELEASE_TAG}"
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
-            string(name: "INPUT_BINARYS", value: binaryURL),
+            string(name: "INPUT_BINARYS", value: binary),
             string(name: "REPO", value: "lightning"),
             string(name: "PRODUCT", value: "lightning"),
             string(name: "RELEASE_TAG", value: RELEASE_TAG),
