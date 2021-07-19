@@ -14,16 +14,16 @@ properties([
                         defaultValue: false,
                         name: 'FORCE_REBUILD'
                 )
+        ]),
+        pipelineTriggers([
+            parameterizedCron('''
+                H H(0-7)/4 * * * % GIT_BRANCH=release-5.0
+                H H(0-7)/4 * * * % GIT_BRANCH=release-5.1
+                H H(0-7)/4 * * * % GIT_BRANCH=master
+            ''')
         ])
 ])
 
-triggers {
-    parameterizedCron("""
-        H H(0-7)/4 * * * % GIT_BRANCH=release-5.0
-        H H(0-7)/4 * * * % GIT_BRANCH=release-5.1
-        H H(0-7)/4 * * * % GIT_BRANCH=master
-    """)
-}
 
 def get_sha(repo) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
