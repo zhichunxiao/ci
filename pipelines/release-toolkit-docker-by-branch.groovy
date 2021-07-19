@@ -17,6 +17,7 @@ properties([
         ]),
         pipelineTriggers([
             parameterizedCron('''
+                H H(0-7)/4 * * * % GIT_BRANCH=release-4.0
                 H H(0-7)/4 * * * % GIT_BRANCH=release-5.0
                 H H(0-7)/4 * * * % GIT_BRANCH=release-5.1
                 H H(0-7)/4 * * * % GIT_BRANCH=master
