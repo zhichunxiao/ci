@@ -164,7 +164,7 @@ def checkoutCode() {
 TARGET = "output" 
 buildsh = [:]
 buildsh["tidb-ctl"] = """
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 go build -o binarys/${PRODUCT}
@@ -178,15 +178,15 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${EDITION} == "enterprise"]; then
+if [ ${EDITION} == 'enterprise']; then
     export TIDB_EDITION=Enterprise
 fi;
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
 git checkout .
-if [ ${ARCH} == "amd64" ]; then
+if [ ${ARCH} == 'amd64' ]; then
     WITH_RACE=1 make && mv bin/tidb-server bin/tidb-server-race
     git checkout .
     WITH_CHECK=1 make && mv bin/tidb-server bin/tidb-server-check
@@ -195,12 +195,12 @@ if [ ${ARCH} == "amd64" ]; then
     git checkout .
     make server_coverage || true
     git checkout .
-    if [ \$(grep -E "^ddltest:" Makefile) ]; then
+    if [ \$(grep -E '^ddltest:' Makefile) ]; then
         git checkout .
         make ddltest
     fi
         
-    if [ \$(grep -E "^importer:" Makefile) ]; then
+    if [ \$(grep -E '^importer:' Makefile) ]; then
         git checkout .
         make importer
     fi
@@ -219,7 +219,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
@@ -235,11 +235,11 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 git checkout .
-if [ ${EDITION} == "enterprise"]; then
+if [ ${EDITION} == 'enterprise']; then
     export TIDB_EDITION=Enterprise
 fi;
 make
@@ -254,7 +254,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
@@ -269,7 +269,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
@@ -283,7 +283,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
@@ -297,7 +297,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
@@ -311,10 +311,10 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${EDITION} == "enterprise"]; then
+if [ ${EDITION} == 'enterprise']; then
     export TIFLASH_EDITION=Enterprise
 fi;
-if [ ${ARCH} == "amd64" ]; then
+if [ ${ARCH} == 'amd64' ]; then
     mkdir -p release-darwin/build/
     [ -f "release-darwin/build/build-release.sh" ] || curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/tiflash/build-release.sh > release-darwin/build/build-release.sh
     [ -f "release-darwin/build/build-cluster-manager.sh" ] || curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/tiflash/build-cluster-manager.sh > release-darwin/build/build-cluster-manager.sh
@@ -335,7 +335,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 -b refs/tags/${RELEASE_TAG}
-if [ ${EDITION} == "enterprise"]; then
+if [ ${EDITION} == 'enterprise']; then
     TIKV_EDITION=Enterprise CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 ROCKSDB_SYS_SSE=0 make dist_release
 else;
     CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make dist_release
@@ -358,7 +358,7 @@ cp target/release/tikv-importer ${TARGET}/bin
 """
 
 buildsh["monitoring"] = """
-if [ ${ARCH} == "arm64" ||  ${OS} == "darwin"]; then
+if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin']; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 go build -o pull-monitoring  cmd/monitoring.go
