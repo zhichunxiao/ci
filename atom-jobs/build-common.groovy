@@ -164,7 +164,7 @@ def checkoutCode() {
 TARGET = "output" 
 buildsh = [:]
 buildsh["tidb-ctl"] = """
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 go build -o binarys/${PRODUCT}
@@ -181,7 +181,7 @@ git checkout -b refs/tags/${RELEASE_TAG}
 if [ ${EDITION} == 'enterprise' ]; then
     export TIDB_EDITION=Enterprise
 fi;
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
@@ -219,7 +219,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
@@ -235,7 +235,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 git checkout .
@@ -254,7 +254,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make clean
@@ -269,7 +269,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
@@ -283,7 +283,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
@@ -297,7 +297,7 @@ for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
 git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 make build
@@ -358,7 +358,7 @@ cp target/release/tikv-importer ${TARGET}/bin
 """
 
 buildsh["monitoring"] = """
-if [ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]; then
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${GO_BIN_PATH}:${env.PATH}
 fi;
 go build -o pull-monitoring  cmd/monitoring.go
