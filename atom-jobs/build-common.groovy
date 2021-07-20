@@ -115,6 +115,7 @@ if (needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH)) {
 // choose which node to use.
 def nodeLabel = goBuildPod
 def containerLabel = "golang"
+def binPath = ""
 if (params.PRODUCT == "tikv" || params.PRODUCT == "importer") {
     nodeLabel = "build"
     containerLabel = "rust"
@@ -124,6 +125,7 @@ if (params.PRODUCT == "tics") {
     containerLabel = "tiflash"
 } 
 if (params.ARCH == "arm64") {
+    binPath = "/usr/local/node/bin:/root/.cargo/bin:/usr/lib64/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:${GO_BIN_PATH}"
     nodeLabel = "arm"
     containerLabel = ""
     if (params.PRODUCT == "tiflash"){
@@ -132,6 +134,7 @@ if (params.ARCH == "arm64") {
     }
 }
 if (params.OS == "darwin") {
+    binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}"
     nodeLabel = "mac"
     containerLabel = ""
 }
@@ -165,7 +168,7 @@ TARGET = "output"
 buildsh = [:]
 buildsh["tidb-ctl"] = """
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 go build -o binarys/${PRODUCT}
 rm -rf ${TARGET}
@@ -182,7 +185,7 @@ if [ ${EDITION} == 'enterprise' ]; then
     export TIDB_EDITION=Enterprise
 fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 make clean
 git checkout .
@@ -220,7 +223,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 make clean
 git checkout .
@@ -236,7 +239,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 git checkout .
 if [ ${EDITION} == 'enterprise' ]; then
@@ -255,7 +258,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 make clean
 make build
@@ -270,7 +273,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 make build
 rm -rf ${TARGET}
@@ -284,7 +287,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 make build
 rm -rf ${TARGET}
@@ -298,7 +301,7 @@ git tag -f ${RELEASE_TAG} ${GIT_HASH}
 git branch -D refs/tags/${RELEASE_TAG} || true
 git checkout -b refs/tags/${RELEASE_TAG}
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 make build
 rm -rf ${TARGET}
@@ -359,7 +362,7 @@ cp target/release/tikv-importer ${TARGET}/bin
 
 buildsh["monitoring"] = """
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
-    export PATH=${GO_BIN_PATH}:${env.PATH}
+    export PATH=${binPath}
 fi;
 go build -o pull-monitoring  cmd/monitoring.go
 ./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=${env.TOKEN}
