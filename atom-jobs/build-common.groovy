@@ -360,6 +360,13 @@ if [ ${EDITION} == 'enterprise' ]; then
     export TIKV_EDITION=Enterprise
     export ROCKSDB_SYS_SSE=0
 fi;
+if [ ${OS} == 'linux' ]; then
+    grpcio_ver=`grep -A 1 'name = "grpcio"' Cargo.lock | tail -n 1 | cut -d '"' -f 2`
+    if [[ ! "0.8.0" > "\$grpcio_ver" ]]; then
+        echo using gcc 8
+        source /opt/rh/devtoolset-8/enable
+    fi;
+fi;
 if [ ${RELEASE_TAG}x == ''x ];then
     CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make fail_release && mv bin/tikv-server bin/tikv-server-failpoint 
 fi;
