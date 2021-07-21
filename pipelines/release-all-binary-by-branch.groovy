@@ -22,11 +22,10 @@ def get_sha(repo) {
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${GIT_BRANCH} -s=${FILE_SERVER_URL}").trim()
 }
 
-RELEASE_TAG = "${GIT_BRANCH}-nightly"
 
 def release_one(repo) {
     def sha1 =  get_sha(repo)
-    def binary = "builds/pingcap/${repo}/test/${GIT_BRANCH}/${sha1}/linux-arm64/${repo}.tar.gz"
+    def binary = "builds/pingcap/${repo}/test/${sha1}/linux-arm64/${repo}.tar.gz"
     def paramsBuild = [
         string(name: "ARCH", value: "arm64"),
         string(name: "OS", value: "linux"),
@@ -35,7 +34,6 @@ def release_one(repo) {
         string(name: "REPO", value: repo),
         string(name: "PRODUCT", value: repo),
         string(name: "GIT_HASH", value: sha1),
-        string(name: "RELEASE_TAG", value: RELEASE_TAG),
         string(name: "TARGET_BRANCH", value: GIT_BRANCH),
         [$class: 'BooleanParameterValue', name: 'FORCE_REBUILD', value: false],
     ]

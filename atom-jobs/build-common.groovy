@@ -177,10 +177,12 @@ cp binarys/${PRODUCT} ${TARGET}/bin/
 """
 
 buildsh["tidb"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [ ${EDITION} == 'enterprise' ]; then
     export TIDB_EDITION=Enterprise
 fi;
@@ -212,16 +214,18 @@ else
 fi;
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
-cp binarys/tidb-ctl ${TARGET}/bin/
+cp binarys/tidb-ctl ${TARGET}/bin/ || true
 cp bin/* ${TARGET}/bin/ 
 
 """
 
 buildsh["tidb-binlog"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
@@ -234,10 +238,12 @@ cp bin/* ${TARGET}/bin/
 """
 
 buildsh["pd"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
@@ -253,10 +259,12 @@ cp bin/* ${TARGET}/bin/
 """
 
 buildsh["tidb-tools"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
@@ -268,10 +276,12 @@ cp bin/* ${TARGET}/bin/
 """
 
 buildsh["ticdc"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
@@ -282,10 +292,12 @@ cp bin/* ${TARGET}/bin/
 """
 
 buildsh["br"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
@@ -296,10 +308,12 @@ cp bin/* ${TARGET}/bin/
 """
 
 buildsh["dumpling"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
@@ -310,10 +324,12 @@ cp bin/* ${TARGET}/bin/
 """
 
 buildsh["tics"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 if [ ${EDITION} == 'enterprise' ]; then
     export TIFLASH_EDITION=Enterprise
 fi;
@@ -334,15 +350,21 @@ fi
 """
 
 buildsh["tikv"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
--b refs/tags/${RELEASE_TAG}
-if [ ${EDITION} == 'enterprise' ]; then
-    TIKV_EDITION=Enterprise CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 ROCKSDB_SYS_SSE=0 make dist_release
-else;
-    CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make dist_release
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
 fi;
+if [ ${EDITION} == 'enterprise' ]; then
+    export TIKV_EDITION=Enterprise
+    export ROCKSDB_SYS_SSE=0
+fi;
+if [ ${RELEASE_TAG}x == ''x ];then
+    CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make fail_release && mv bin/tikv-server bin/tikv-server-failpoint 
+fi;
+CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make dist_release
+wait
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin
 cp bin/* binarys
@@ -350,10 +372,12 @@ cp bin/* ${TARGET}/bin
 """
 
 buildsh["importer"] = """
-for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
-git tag -f ${RELEASE_TAG} ${GIT_HASH}
-git branch -D refs/tags/${RELEASE_TAG} || true
-git checkout -b refs/tags/${RELEASE_TAG}
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
 ROCKSDB_SYS_SSE=0 make release
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin
@@ -392,6 +416,12 @@ mkdir ${TARGET}
 """
 
 def packageBinary() {
+    if ((PRODUCT == "pd" || PRODUCT == "tidb") && RELEASE_TAG.length() < 1) {
+        sh """
+        tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
+        curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
+        """
+    }
     sh """
     tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz ${TARGET}
     curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
