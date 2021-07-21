@@ -85,12 +85,6 @@ def ifFileCacheExists() {
     }
     return false
 }
-// if has built,skip build.
-node {
-    if (ifFileCacheExists()) {
-        return
-    }
-}
 
 
 // choose which go version to use. 
@@ -436,6 +430,10 @@ def packageBinary() {
 }
 
 def release() {
+    // if has built,skip build.
+    if (ifFileCacheExists()) {
+        return
+    }
     checkoutCode()
     // some build need this token.
     withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
