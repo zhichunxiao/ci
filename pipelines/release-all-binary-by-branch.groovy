@@ -46,7 +46,7 @@ def release_one(repo) {
 stage ("release") {
     node("${GO_BUILD_SLAVE}") {
         container("golang") {
-            releaseRepos = ["tidb","tikv","pd"]
+            releaseRepos = ["tidb","tidb-test","tikv","pd"]
             builds = [:]
             for (item in releaseRepos) {
                 def product = "${item}"

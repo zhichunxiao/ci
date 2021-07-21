@@ -395,6 +395,27 @@ mkdir -p ${TARGET}
 mv monitor-snapshot/${RELEASE_TAG}/operator ${TARGET}
 """
 
+buildsh["tidb-test"] = """
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
+    export PATH=${binPath}
+fi;
+if [ -d "partition_test/build.sh" ]; then
+    cd partition_test
+    bash build.sh
+    cd ..
+fi;
+if [ -d "coprocessor_test/build.sh" ]; then
+    cd coprocessor_test
+    bash build.sh
+    cd ..
+fi;
+if [ -d "concurrent-sql/build.sh" ]; then
+    cd concurrent-sql
+    bash build.sh
+    cd ..
+fi;
+"""
+
 buildsh["enterprise-plugin"] = """
 rsync -av --progress ./ ./enterprise-plugin --exclude enterprise-plugin
 git clone https://github.com/pingcap/tidb.git --depth=1
@@ -416,16 +437,17 @@ mkdir ${TARGET}
 """
 
 def packageBinary() {
-    if ((PRODUCT == "pd" || PRODUCT == "tidb") && RELEASE_TAG.length() < 1) {
+    if ((PRODUCT == "pd" || PRODUCT == "tidb" || PRODUCT == "tidb-test" ) && RELEASE_TAG.length() < 1) {
         sh """
         tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
         curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
         """
+    }else {
+        sh """
+        tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz ${TARGET}
+        curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
+        """
     }
-    sh """
-    tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz ${TARGET}
-    curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
-    """
 }
 
 def release() {
