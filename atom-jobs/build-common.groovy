@@ -361,14 +361,13 @@ if [ ${OS} == 'linux' ]; then
         source /opt/rh/devtoolset-8/enable
     fi;
 fi;
-if [ ${RELEASE_TAG}x == ''x ];then
-    CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make fail_release && mv bin/tikv-server bin/tikv-server-failpoint 
-fi;
+# if [ ${RELEASE_TAG}x == ''x ];then
+#     CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make fail_release && mv bin/tikv-server bin/tikv-server-failpoint 
+# fi;
 CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make dist_release
 wait
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin
-cp bin/* binarys
 cp bin/* ${TARGET}/bin
 """
 
