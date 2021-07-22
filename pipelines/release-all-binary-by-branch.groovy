@@ -11,7 +11,7 @@ properties([
                         trim: true
                 ),
                 booleanParam(
-                        defaultValue: false,
+                        defaultValue: true,
                         name: 'FORCE_REBUILD'
                 )
         ])
@@ -35,7 +35,7 @@ def release_one(repo) {
         string(name: "PRODUCT", value: repo),
         string(name: "GIT_HASH", value: sha1),
         string(name: "TARGET_BRANCH", value: GIT_BRANCH),
-        [$class: 'BooleanParameterValue', name: 'FORCE_REBUILD', value: false],
+        [$class: 'BooleanParameterValue', name: 'FORCE_REBUILD', value: params.FORCE_REBUILD],
     ]
     build job: "build-common",
             wait: true,
