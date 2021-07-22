@@ -185,7 +185,7 @@ if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
 fi;
 make clean
 git checkout .
-if [ ${ARCH} == 'amd64' ]; then
+if [ ${OS} == 'linux' ]; then
     WITH_RACE=1 make && mv bin/tidb-server bin/tidb-server-race
     git checkout .
     WITH_CHECK=1 make && mv bin/tidb-server bin/tidb-server-check
@@ -433,7 +433,7 @@ md5sum audit-1.so > audit-1.so.md5
 curl -F builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so.md5=@audit-1.so.md5 ${FILE_SERVER_URL}/upload
 curl -F builds/pingcap/tidb-plugins/test/${RELEASE_TAG}/centos7/audit-1.so=@audit-1.so ${FILE_SERVER_URL}/upload
 rm -rf ${TARGET}
-mkdir ${TARGET}
+mkdir ${TARGET}/bin
 """
 
 def packageBinary() {
@@ -444,7 +444,8 @@ def packageBinary() {
         """
     }else {
         sh """
-        tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz ${TARGET}
+        cd ${TARGET}
+        tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
         curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
         """
     }

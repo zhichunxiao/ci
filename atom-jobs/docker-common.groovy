@@ -104,7 +104,7 @@ def build_image() {
     } else { // 如果没定义，使用默认构建脚本
         sh """
         cp /usr/local/go/lib/time/zoneinfo.zip ./
-        cp output/bin/* ./
+        cp bin/* ./
         curl -o Dockerfile ${DOCKERFILE}
         docker build  -t ${imagePlaceHolder} .
         """
