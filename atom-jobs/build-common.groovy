@@ -203,6 +203,7 @@ if [ ${OS} == 'linux' ]; then
         git checkout .
         make importer
     fi
+    make 
 else 
     make 
 fi;
