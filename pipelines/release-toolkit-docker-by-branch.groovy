@@ -54,6 +54,9 @@ def release_one(repo) {
 
     def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
     def image = "hub.pingcap.net/guoyu/${repo}:${RELEASE_TAG}"
+    if (GIT_BRANCH == "master") {
+        image = "hub.pingcap.net/guoyu/${repo}:nightly"
+    }
     def paramsDocker = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
@@ -71,6 +74,9 @@ def release_one(repo) {
     if (repo == "br") {
         def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
         def imageLightling = "hub.pingcap.net/guoyu/lightning:${RELEASE_TAG}"
+        if (GIT_BRANCH == "master") {
+        imageLightling = "hub.pingcap.net/guoyu/lightning:nightly"
+    }
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
