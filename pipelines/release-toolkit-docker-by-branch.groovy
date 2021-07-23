@@ -65,7 +65,7 @@ def release_one(repo) {
         string(name: "PRODUCT", value: repo),
         string(name: "RELEASE_TAG", value: RELEASE_TAG),
         string(name: "DOCKERFILE", value: dockerfile),
-        string(name: "RELEASE_DOCKER_IMAGES", value: FORCE_REBUILD),
+        string(name: "RELEASE_DOCKER_IMAGES", value: image),
     ]
     build job: "docker-common",
             wait: true,
