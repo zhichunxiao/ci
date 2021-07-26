@@ -122,7 +122,7 @@ if (params.ARCH == "arm64") {
     binPath = "/usr/local/node/bin:/root/.cargo/bin:/usr/lib64/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:${GO_BIN_PATH}"
     nodeLabel = "arm"
     containerLabel = ""
-    if (params.PRODUCT == "tiflash"){
+    if (params.PRODUCT == "tics"){
         nodeLabel = "tiflash_build_arm"
         containerLabel = "tiflash"
     }
