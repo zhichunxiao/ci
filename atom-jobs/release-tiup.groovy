@@ -1,5 +1,6 @@
 /*
 * @INPUT_BINARY(string:binary url on fileserver, transfer througth atom jobs, Required)
+* @REPO(string:repo name,eg tidb, Required)
 * @PRODUCT(string:product name,eg tidb-binlog, Required)
 * @ARCH(enumerate:linux-arm64,linux-amd64,darwin-amd64, Required)
 * @GIT_HASH(string:to get correct code from github, Required)
