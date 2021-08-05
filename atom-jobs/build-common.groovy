@@ -359,6 +359,7 @@ else
     NPROC=12 release-centos7/build/build-release.sh
     mv release-centos7 ${TARGET}
 fi
+rm -rf ${TARGET}/build-release || true
 """
 
 buildsh["tikv"] = """
