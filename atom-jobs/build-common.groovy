@@ -318,7 +318,11 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
-make build
+if [ ${REPO} == "tidb" ]; then
+    make build_tools
+else
+    make build
+fi;
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
 cp bin/* ${TARGET}/bin/   
@@ -478,6 +482,7 @@ mkdir ${TARGET}/bin
 """
 
 def packageBinary() {
+    //  pd,tidb,tidb-test 非release版本，和代码一起打包
     if ((PRODUCT == "pd" || PRODUCT == "tidb" || PRODUCT == "tidb-test" ) && RELEASE_TAG.length() < 1) {
         sh """
         tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
