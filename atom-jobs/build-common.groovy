@@ -86,6 +86,21 @@ def ifFileCacheExists() {
     return false
 }
 
+@NonCPS
+boolean isMoreRecentOrEqual( String a, String b ) {
+    if (a == b) {
+        return true
+    }
+
+    [a,b]*.tokenize('.')*.collect { it as int }.with { u, v ->
+       Integer result = [u,v].transpose().findResult{ x,y -> x <=> y ?: null } ?: u.size() <=> v.size()
+       return (result == 1)
+    } 
+}
+
+string trimPrefix = {
+    it.startsWith('release-') ? it.minus('release-') : it 
+}
 
 // choose which go version to use. 
 def boolean needUpgradeGoVersion(String tag,String branch) {
@@ -93,7 +108,11 @@ def boolean needUpgradeGoVersion(String tag,String branch) {
         println "tag=${tag} need upgrade go version"
         return true
     }
-    if (branch.startsWith("master") || branch.startsWith("release-5.1")) {
+    if (branch.startsWith("master") || branch.startsWith("hz-poc")) {
+        println "targetBranch=${branch} need upgrade go version"
+        return true
+    }
+    if (isMoreRecentOrEqual(trimPrefix(branch), "release-5.1")) {
         println "targetBranch=${branch} need upgrade go version"
         return true
     }
