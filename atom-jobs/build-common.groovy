@@ -112,12 +112,15 @@ def boolean needUpgradeGoVersion(String tag,String branch) {
         println "targetBranch=${branch} need upgrade go version"
         return true
     }
-    if (isMoreRecentOrEqual(trimPrefix(branch), "release-5.1")) {
-        println "targetBranch=${branch} need upgrade go version"
-        return true
+    if (branch.startsWith("release-")) {
+        if (isMoreRecentOrEqual(trimPrefix(branch), trimPrefix("release-5.1"))) {
+            println "targetBranch=${branch} need upgrade go version"
+            return true
+        }
     }
     return false
 }
+
 def goBuildPod = "${GO_BUILD_SLAVE}"
 def GO_BIN_PATH = "/usr/local/go/bin"
 if (needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH)) {
