@@ -20,6 +20,7 @@ properties([
                 H H(0-7)/4 * * * % GIT_BRANCH=release-4.0
                 H H(0-7)/4 * * * % GIT_BRANCH=release-5.0
                 H H(0-7)/4 * * * % GIT_BRANCH=release-5.1
+                H H(0-7)/4 * * * % GIT_BRANCH=release-5.2
                 H H(0-7)/4 * * * % GIT_BRANCH=master
             ''')
         ])
@@ -36,12 +37,19 @@ RELEASE_TAG = "${GIT_BRANCH}-nightly"
 def release_one(repo) {
     def sha1 =  get_sha(repo)
     def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+    def actualRepo = repo
+    if (repo == "br" && GIT_BRANCH == "master") {
+        actualRepo = "tidb"
+    }
+    if (repo == "br" && GIT_BRANCH.startsWith("release-") && GIT_BRANCH >= "release-5.2") {
+        actualRepo = "tidb"
+    }
     def paramsBuild = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
         string(name: "EDITION", value: "community"),
         string(name: "OUTPUT_BINARY", value: binary),
-        string(name: "REPO", value: repo),
+        string(name: "REPO", value: actualRepo),
         string(name: "PRODUCT", value: repo),
         string(name: "GIT_HASH", value: sha1),
         string(name: "RELEASE_TAG", value: RELEASE_TAG),
