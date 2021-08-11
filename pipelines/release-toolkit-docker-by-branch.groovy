@@ -35,8 +35,6 @@ def get_sha(repo) {
 RELEASE_TAG = "${GIT_BRANCH}-nightly"
 
 def release_one(repo) {
-    def sha1 =  get_sha(repo)
-    def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
     def actualRepo = repo
     if (repo == "br" && GIT_BRANCH == "master") {
         actualRepo = "tidb"
@@ -44,6 +42,8 @@ def release_one(repo) {
     if (repo == "br" && GIT_BRANCH.startsWith("release-") && GIT_BRANCH >= "release-5.2") {
         actualRepo = "tidb"
     }
+    def sha1 =  get_sha(actualRepo)
+    def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
     def paramsBuild = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
