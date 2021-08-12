@@ -9,6 +9,7 @@
 * @RELEASE_TAG(string:for release workflow,what tag to release,Optional)
 * @TARGET_BRANCH(string:for daily CI workflow,Optional)
 * @FORCE_REBUILD(bool:if force rebuild binary,default true,Optional)
+* @FAILPOINT(bool:build failpoint binary or not,default false,Optional)
 * @EDITION(enumerate:,community,enterprise,Required)
 */
 
@@ -64,6 +65,10 @@ properties([
                 booleanParam(
                         defaultValue: true,
                         name: 'FORCE_REBUILD'
+                ),
+                booleanParam(
+                        name: 'FAILPOINT',
+                        defaultValue: false
                 )
         ])
 ])
@@ -71,6 +76,12 @@ properties([
 if (params.PRODUCT.length() <= 1) {
     PRODUCT = REPO
 }
+
+failpoint = "false"
+if (params.FAILPOINT) {
+    failpoint = "true"
+}
+
 
 // check if binary already has been built. 
 def ifFileCacheExists() {
@@ -371,7 +382,7 @@ fi;
 if [ ${EDITION} == 'enterprise' ]; then
     export TIFLASH_EDITION=Enterprise
 fi;
-if [ ${ARCH} == 'amd64' ]; then
+if [ ${OS} == 'darwin' ]; then
     mkdir -p release-darwin/build/
     [ -f "release-darwin/build/build-release.sh" ] || curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/tiflash/build-release.sh > release-darwin/build/build-release.sh
     [ -f "release-darwin/build/build-cluster-manager.sh" ] || curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/tiflash/build-cluster-manager.sh > release-darwin/build/build-cluster-manager.sh
