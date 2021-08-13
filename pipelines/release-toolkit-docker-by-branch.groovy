@@ -34,7 +34,7 @@ def get_sha(repo) {
 
 RELEASE_TAG = "${GIT_BRANCH}-nightly"
 
-def release_one(repo) {
+def release_one(repo,failpoint) {
     def actualRepo = repo
     if (repo == "br" && GIT_BRANCH == "master") {
         actualRepo = "tidb"
@@ -44,6 +44,9 @@ def release_one(repo) {
     }
     def sha1 =  get_sha(actualRepo)
     def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+    if (failpoint) {
+        binary = "builds/pingcap/${repo}/test/failpoint/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+    }
     def paramsBuild = [
         string(name: "ARCH", value: "amd64"),
         string(name: "OS", value: "linux"),
@@ -56,6 +59,9 @@ def release_one(repo) {
         string(name: "TARGET_BRANCH", value: GIT_BRANCH),
         [$class: 'BooleanParameterValue', name: 'FORCE_REBUILD', value: FORCE_REBUILD],
     ]
+    if (failpoint) {
+        paramsBuild.push([$class: 'BooleanParameterValue', name: 'FAILPOINT', value: true])
+    }
     build job: "build-common",
             wait: true,
             parameters: paramsBuild
@@ -64,6 +70,9 @@ def release_one(repo) {
     def image = "hub.pingcap.net/guoyu/${repo}:${RELEASE_TAG}"
     if (GIT_BRANCH == "master") {
         image = "hub.pingcap.net/guoyu/${repo}:nightly"
+    }
+    if (failpoint) {
+        image = "${image}-failpoint"
     }
     def paramsDocker = [
         string(name: "ARCH", value: "amd64"),
@@ -109,7 +118,14 @@ stage ("release") {
             for (item in releaseRepos) {
                 def product = "${item}"
                 builds["build ${item}"] = {
-                    release_one(product)
+                    release_one(product,false)
+                }
+            }
+            failpointRepos = ["tidb","pd","tikv"]
+            for (item in failpointRepos) {
+                def product = "${item}"
+                builds["build ${item} failpoint"] {
+                    release_one(product,true)
                 }
             }
             parallel builds

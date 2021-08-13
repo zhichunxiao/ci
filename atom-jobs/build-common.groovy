@@ -9,7 +9,7 @@
 * @RELEASE_TAG(string:for release workflow,what tag to release,Optional)
 * @TARGET_BRANCH(string:for daily CI workflow,Optional)
 * @FORCE_REBUILD(bool:if force rebuild binary,default true,Optional)
-* @FAILPOINT(bool:build failpoint binary or not,default false,Optional)
+* @FAILPOINT(bool:build failpoint binary or not,only for tidb,tikv,pd now ,default false,Optional)
 * @EDITION(enumerate:,community,enterprise,Required)
 */
 
@@ -218,6 +218,9 @@ if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
 fi;
 make clean
 git checkout .
+if [ ${failpoint} == 'true' ]; then
+    make failpoint-enable
+fi;
 if [ ${OS} == 'linux' ]; then
     WITH_RACE=1 make && mv bin/tidb-server bin/tidb-server-race
     git checkout .
@@ -236,10 +239,11 @@ if [ ${OS} == 'linux' ]; then
         git checkout .
         make importer
     fi
-    make 
-else 
-    make 
 fi;
+if [ ${failpoint} == 'true' ]; then
+    make failpoint-enable
+fi;
+make 
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
 cp binarys/tidb-ctl ${TARGET}/bin/ || true
@@ -278,6 +282,9 @@ fi;
 git checkout .
 if [ ${EDITION} == 'enterprise' ]; then
     export TIDB_EDITION=Enterprise
+fi;
+if [ ${failpoint} == 'true' ]; then
+    make failpoint-enable
 fi;
 make
 make tools
@@ -417,10 +424,11 @@ if [ ${OS} == 'linux' ]; then
         source /opt/rh/devtoolset-8/enable
     fi;
 fi;
-# if [ ${RELEASE_TAG}x == ''x ];then
-#     CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make fail_release && mv bin/tikv-server bin/tikv-server-failpoint 
-# fi;
-CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make dist_release
+if [ ${failpoint} == 'true' ]; then
+    CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make fail_release
+else
+    CARGO_TARGET_DIR=.target ROCKSDB_SYS_STATIC=1 make dist_release
+fi;
 wait
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin
