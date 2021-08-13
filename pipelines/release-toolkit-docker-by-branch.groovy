@@ -124,7 +124,7 @@ stage ("release") {
             failpointRepos = ["tidb","pd","tikv"]
             for (item in failpointRepos) {
                 def product = "${item}"
-                builds["build ${item} failpoint"] {
+                builds["build ${item} failpoint"] = {
                     release_one(product,true)
                 }
             }
