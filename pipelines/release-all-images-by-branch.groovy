@@ -27,12 +27,20 @@ properties([
 ])
 
 
+string trimPrefix = {
+    it.startsWith('release-') ? it.minus('release-').split("-")[0] : it 
+}
+
 def get_sha(repo) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${GIT_BRANCH} -s=${FILE_SERVER_URL}").trim()
 }
 
-RELEASE_TAG = "${GIT_BRANCH}"
+RELEASE_TAG = "v5.2.0-nightly"
+if (GIT_BRANCH.startsWith("release-")) {
+    RELEASE_TAG = "v"+ trimPrefix(GIT_BRANCH) + ".0-nightly"
+}
+
 
 def release_one(repo,failpoint) {
     def actualRepo = repo
@@ -43,9 +51,9 @@ def release_one(repo,failpoint) {
         actualRepo = "tidb"
     }
     def sha1 =  get_sha(actualRepo)
-    def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+    def binary = "builds/pingcap/${repo}/test/${GIT_BRANCH}/${sha1}/linux-amd64/${repo}.tar.gz"
     if (failpoint) {
-        binary = "builds/pingcap/${repo}/test/failpoint/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+        binary = "builds/pingcap/${repo}/test/failpoint/${GIT_BRANCH}/${sha1}/linux-amd64/${repo}.tar.gz"
     }
     def paramsBuild = [
         string(name: "ARCH", value: "amd64"),
@@ -67,7 +75,7 @@ def release_one(repo,failpoint) {
             parameters: paramsBuild
 
     def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
-    def image = "hub.pingcap.net/qa/${repo}:${RELEASE_TAG}"
+    def image = "hub.pingcap.net/qa/${repo}:${GIT_BRANCH}"
     if (failpoint) {
         image = "${image}-failpoint"
     }
@@ -87,7 +95,7 @@ def release_one(repo,failpoint) {
 
     if (repo == "br") {
         def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
-        def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${RELEASE_TAG}"
+        def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}"
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
