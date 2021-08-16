@@ -32,7 +32,7 @@ def get_sha(repo) {
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${GIT_BRANCH} -s=${FILE_SERVER_URL}").trim()
 }
 
-RELEASE_TAG = "${GIT_BRANCH}-nightly"
+RELEASE_TAG = "${GIT_BRANCH}"
 
 def release_one(repo,failpoint) {
     def actualRepo = repo
@@ -67,10 +67,7 @@ def release_one(repo,failpoint) {
             parameters: paramsBuild
 
     def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
-    def image = "hub.pingcap.net/guoyu/${repo}:${RELEASE_TAG}"
-    if (GIT_BRANCH == "master") {
-        image = "hub.pingcap.net/guoyu/${repo}:nightly"
-    }
+    def image = "hub.pingcap.net/qa/${repo}:${RELEASE_TAG}"
     if (failpoint) {
         image = "${image}-failpoint"
     }
@@ -90,10 +87,7 @@ def release_one(repo,failpoint) {
 
     if (repo == "br") {
         def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
-        def imageLightling = "hub.pingcap.net/guoyu/lightning:${RELEASE_TAG}"
-        if (GIT_BRANCH == "master") {
-        imageLightling = "hub.pingcap.net/guoyu/lightning:nightly"
-    }
+        def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${RELEASE_TAG}"
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
