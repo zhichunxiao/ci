@@ -78,7 +78,7 @@ else
 fi;
 """
 buildImgagesh["monitoring"] = """
-docker build pingcap/tidb-monitor-initializer .
+docker build -t pingcap/tidb-monitor-initializer .
 """
 
 // 构建出的镜像名称
