@@ -456,7 +456,7 @@ go build -o pull-monitoring  cmd/monitoring.go
 ./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=\$TOKEN
 rm -rf ${TARGET}
 mkdir -p ${TARGET}
-mv monitor-snapshot/${RELEASE_TAG}/operator ${TARGET}
+mv monitor-snapshot/${RELEASE_TAG}/operator/* ${TARGET}
 """
 
 buildsh["tidb-test"] = """
