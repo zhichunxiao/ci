@@ -453,7 +453,7 @@ if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
 go build -o pull-monitoring  cmd/monitoring.go
-./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=$TOKEN
+./pull-monitoring  --config=monitoring.yaml --auto-push --tag=${RELEASE_TAG} --token=\$TOKEN
 rm -rf ${TARGET}
 mkdir -p ${TARGET}
 mv monitor-snapshot/${RELEASE_TAG}/operator ${TARGET}
