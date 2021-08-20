@@ -2,9 +2,9 @@
 * input
 * @REPO(string: github repo name, Required)
 * @PULL_ID(int: pull request id, Optional)
-* @COMMIT_ID(string: commit id request id, Optional)
+* @COMMIT_ID(string: commit id request id, Required)
 * @BRANCH(string: branch name, Optional)
-* @
+*
 *
 * output
 * @CACHE_CODE_URL(string: cache code tar file download url)
