@@ -9,6 +9,9 @@
 * output
 * @CACHE_CODE_URL(string: cache code tar file download url)
 * @CACHE_CODE_SHA256_URL(string: cache code tar file sha256 sum file url)
+*
+* doc
+* https://docs.google.com/document/d/1hcs4F6BUKiiLHetLMXM2323_J5_yLdG5OyXddNt2-Vk/edit?usp=sharing
 */
 
 properties([
