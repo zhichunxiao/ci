@@ -1,5 +1,40 @@
+properties([
+    parameters([
+        string(
+            defaultValue: 'tidb',
+            name: 'REPO',
+            trim: true
+        ),
+        string(
+            defaultValue: 'http://fileserver.pingcap.net/download/builds/pingcap/devops/cachecode/tidb/086a63f4713416ae5976eecc5a4d7c40f6121079/tidb.tar.gz',
+            name: 'CACHE_CODE_FILESERVER_URL',
+            trim: true
+        ),
+        string(
+            defaultValue: '086a63f4713416ae5976eecc5a4d7c40f6121079',
+            name: 'COMMIT_ID',
+            trim: true,
+        ),
+        string(
+            defaultValue: 'make',
+            name: 'BUILD_CMD',
+            trim: true
+        ),
+        string(
+            defaultValue: 'hub-new.pingcap.net/jenkins/centos7_golang-1.16',
+            name: 'BUILD_ENV',
+            trim: true,
+        ),
+        string(
+            defaultValue: 'bin',
+            name: 'OUTPUT_DIR',
+            trim: true
+        ),
+    ])
+])
+
 def run_with_pod(Closure body) {
-    def label = "cache-code-atom-job"
+    def label = "atom-build-atom-job"
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
     def pod_go_docker_image = 'hub-new.pingcap.net/jenkins/centos7_golang-1.16'
