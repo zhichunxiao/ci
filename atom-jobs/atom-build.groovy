@@ -15,7 +15,7 @@ properties([
             name: 'COMMIT_ID',
             trim: true,
         ),
-        string(
+        text(
             defaultValue: 'make',
             name: 'BUILD_CMD',
             trim: true
