@@ -1,4 +1,3 @@
-
 /*
 * input
 * @REPO(string: github repo name, Required)
@@ -10,27 +9,25 @@
 * doc
 */
 
-
-
 properties([
         parameters([
                 string(
-                        defaultValue: 'tiem',
+                        defaultValue: '',
                         name: 'REPO',
                         trim: true
                 ),
                 string(
-                        defaultValue: '36c442509f86d58a69004059ba0ac3b74e4e4051',
+                        defaultValue: '',
                         name: 'COMMIT_ID',
                         trim: true,
                 ),
                 string(
-                        defaultValue: 'http://fileserver.pingcap.net/download/builds/pingcap/devops/cachecode/tidb/086a63f4713416ae5976eecc5a4d7c40f6121079/tidb.tar.gz',
+                        defaultValue: '',
                         name: 'CACHE_CODE_FILESERVER_URL',
                         trim: true
                 ),
                 text(
-                        defaultValue: 'golangci-lint run  --out-format=junit-xml  --timeout=10m  --config ./.golangci.yml  -v ./... > golangci-lint-report.xml',
+                        defaultValue: 'golangci-lint run  --out-format=junit-xml  --timeout=10m  -v ./... > golangci-lint-report.xml',
                         name: 'LINT_CMD',
                         trim: true
                 ),
@@ -38,7 +35,7 @@ properties([
 ])
 
 
-LINT_CONFIG_URL = "https://raw.githubusercontent.com/purelind/devops-config/purelind/tiem-init-golangci-lint/tiem/golangci.yaml"
+LINT_CONFIG_URL = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/main/${REPO}/golangci-lint.yaml"
 
 
 def run_with_pod(Closure body) {
@@ -89,14 +86,14 @@ try {
                 dir("${REPO}") {
                     stage("Download code from fileserver") {
                         sh """
-                    curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1
-                    """
+                        curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1
+                        """
                     }
 
                     stage("Download lint conf") {
                         sh """
-                    curl -L -o .golangci.yml ${LINT_CONFIG_URL}
-                    """
+                        curl -L -o .golangci.yml ${LINT_CONFIG_URL}
+                        """
                     }
 
                     stage("Lint check") {
