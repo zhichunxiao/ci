@@ -131,8 +131,16 @@ def release_images() {
                """
            }
        }
-       if (item.startsWith("hub.pingcap.net/") || item.startsWith("hub-new.pingcap.net/")) {
+       if (item.startsWith("hub.pingcap.net/")) {
            docker.withRegistry("https://hub.pingcap.net", "harbor-pingcap") {
+               sh """
+               docker tag ${imagePlaceHolder} ${item}
+               docker push ${item}
+               """
+           }
+       }
+       if (item.startsWith("hub-new.pingcap.net/")) {
+           docker.withRegistry("https://hub-new.pingcap.net", "harbor-pingcap") {
                sh """
                docker tag ${imagePlaceHolder} ${item}
                docker push ${item}
