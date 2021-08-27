@@ -76,6 +76,9 @@ def release_one(repo,failpoint) {
 
     def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
     def image = "hub-new.pingcap.net/qa/${repo}:${GIT_BRANCH}"
+    if (repo == "tics") {
+        image = image + ",hub-new.pingcap.net/qa/tiflash:${GIT_BRANCH}"
+    }
     if (failpoint) {
         image = "${image}-failpoint"
     }
