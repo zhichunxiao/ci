@@ -4,7 +4,7 @@ if (repoInfo.length == 2) {
     repo = repoInfo[1]
 }
 
-def configfile = "https://raw.githubusercontent.com/dianqihanwangzi/devops-config/main/${repo}/verify.yaml"
+def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/main/${repo}/verify.yaml"
 
 class Resource {
    String cpu;
