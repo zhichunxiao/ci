@@ -94,7 +94,7 @@ try {
                 stage("Cyclo check") {
                     sh """
                     export PATH=${ws}/go/bin:\$PATH
-                    ${CYCLO_CMD}
+                    ${CYCLO_CMD} || exit 0
                     """
                 }
             }
