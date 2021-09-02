@@ -12,17 +12,17 @@
 properties([
         parameters([
                 string(
-                        defaultValue: 'tiem',
+                        defaultValue: '',
                         name: 'REPO',
                         trim: true
                 ),
                 string(
-                        defaultValue: '73f6cf445346e79d2405ea7af852403108f25182',
+                        defaultValue: '',
                         name: 'COMMIT_ID',
                         trim: true,
                 ),
                 string(
-                        defaultValue: 'http://fileserver.pingcap.net/download/builds/pingcap/devops/cachecode/tiem/73f6cf445346e79d2405ea7af852403108f25182/tiem.tar.gz',
+                        defaultValue: '',
                         name: 'CACHE_CODE_FILESERVER_URL',
                         trim: true
                 ),
