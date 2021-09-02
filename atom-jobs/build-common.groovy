@@ -129,6 +129,9 @@ def boolean needUpgradeGoVersion(String tag,String branch) {
             return true
         }
     }
+    if (REPO == "tiem") {
+        return true
+    }
     return false
 }
 
