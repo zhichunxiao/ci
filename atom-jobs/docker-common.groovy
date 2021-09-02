@@ -68,19 +68,6 @@ def download() {
     }
 }
 
-// 定义非默认的构建镜像脚本
-buildImgagesh = [:]
-buildImgagesh["tics"] = """
-if [ ${RELEASE_TAG} == "" ];then  
-    while ! make image_tiflash_ci ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
-else
-    while ! make image_tiflash_release ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
-fi;
-"""
-buildImgagesh["monitoring"] = """
-docker build -t pingcap/tidb-monitor-initializer .
-"""
-
 // 构建出的镜像名称
 imagePlaceHolder = "placeholder"
 // 使用非默认脚本构建镜像，构建出的镜像名称需要在下面定义 
@@ -94,6 +81,26 @@ if (PRODUCT == "tics" ) {
 if (PRODUCT == "monitoring" ) {
     imagePlaceHolder = "pingcap/tidb-monitor-initializer"
 }
+
+// 定义非默认的构建镜像脚本
+buildImgagesh = [:]
+buildImgagesh["tics"] = """
+if [ ${RELEASE_TAG} == "" ];then  
+    while ! make image_tiflash_ci ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
+else
+    while ! make image_tiflash_release ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
+fi;
+"""
+
+buildImgagesh["monitoring"] = """
+docker build -t pingcap/tidb-monitor-initializer .
+"""
+
+buildImgagesh["tiem"] = """
+cp /usr/local/go/lib/time/zoneinfo.zip ./
+curl -o Dockerfile ${DOCKERFILE}
+docker build  -t ${imagePlaceHolder} .
+"""
 
 
 

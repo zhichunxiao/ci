@@ -171,6 +171,9 @@ repo = "git@github.com:pingcap/${REPO}.git"
 if (REPO == "tikv" || REPO == "importer" || REPO == "pd") {
     repo = "git@github.com:tikv/${REPO}.git"
 }
+if (REPO == "tiem") {
+    repo = "git@github.com:pingcap-inc/${REPO}.git"
+}
 specRef = "+refs/heads/*:refs/remotes/origin/*"
 if (params.GIT_PR.length() >= 1) {
    specRef = "+refs/pull/${GIT_PR}/*:refs/remotes/origin/pr/${GIT_PR}/*"
@@ -459,6 +462,13 @@ mkdir -p ${TARGET}
 mv monitor-snapshot/${RELEASE_TAG}/operator/* ${TARGET}
 """
 
+buildsh["tiem"] = """
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
+    export PATH=${binPath}
+fi;
+make build
+"""
+
 buildsh["tidb-test"] = """
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
@@ -507,7 +517,12 @@ def packageBinary() {
         tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
         curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
         """
-    }else {
+    } else if (PRODUCT == "tiem") {
+        sh """
+        tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
+        curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
+        """
+    } else {
         sh """
         cd ${TARGET}
         tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
