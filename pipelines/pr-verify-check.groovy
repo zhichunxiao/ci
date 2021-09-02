@@ -36,6 +36,11 @@ class LintConfig {
    String reportDir;
 }
 
+class GosecConfig {
+    String shellScript;
+    String reportDir;
+}
+
 
 
 
@@ -68,6 +73,15 @@ def parseLintConfig(configs) {
     lintConfig.shellScript = configs.lint.shellScript.toString()
     return lintConfig
 }
+
+def parseGosecConfig(configs) {
+    def gosecConfig = new GosecConfig()
+    gosecConfig.reportDir = configs.gosec.reportDir.toString()
+    gosecConfig.shellScript = configs.gosec.shellScript.toString()
+    return gosecConfig
+}
+
+
 
 cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${ghprbActualCommit}/${repo}.tar.gz"
 
@@ -117,6 +131,17 @@ def unitTest(unitTestConfig) {
     build(job: "atom-ut", parameters: buildParams, wait: true)
 }
 
+def codeGosec(gosecConfig) {
+    gosecParams = [
+            string(name: 'REPO', value: repo),
+            string(name: 'COMMIT_ID', value: ghprbActualCommit),
+            string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
+            text(name: 'CMD', value: gosecConfig.shellScript),
+            string(name: 'REPORT_DIR', value: gosecConfig.reportDir),
+    ]
+    build(job: "atom-gosec", parameters: gosecParams, wait: true)
+}
+
 
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
@@ -124,6 +149,7 @@ node("${GO_BUILD_SLAVE}") {
         buildConfig = parseBuildConfig(configs)
         unitTestConfig = parseUnitTestConfig(configs)
         lintConfig = parseLintConfig(configs)
+        gosecConfig = parseGosecConfig(configs)
         stage("get code") {
             cacheCode()
         }
@@ -136,6 +162,9 @@ node("${GO_BUILD_SLAVE}") {
         }
         jobs["uint-test"] = {
             unitTest(unitTestConfig)
+        }
+        jobs["gosec"] = {
+            codeGosec(gosecConfig)
         }
         stage("verify") {
             parallel jobs
