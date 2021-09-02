@@ -98,7 +98,6 @@ docker build -t pingcap/tidb-monitor-initializer .
 
 buildImgagesh["tiem"] = """
 cp /usr/local/go/lib/time/zoneinfo.zip ./
-curl -o Dockerfile ${DOCKERFILE}
 docker build  -t ${imagePlaceHolder} .
 """
 
