@@ -27,7 +27,7 @@ properties([
                         trim: true
                 ),
                 text(
-                        defaultValue: 'gosec -fmt=junit-xml -out=results.xml -stdout -verbose=text -exclude=G103,G104,G204,G307,G401,G404,G501,G505,G601 ./...',
+                        defaultValue: 'gosec -fmt=junit-xml -out=results.xml -stdout -verbose=text -exclude=G103,G104,G204,G307,G401,G404,G501,G505,G601 ./...  || exit 0',
                         name: 'CMD'
                 ),
         ])
@@ -93,7 +93,7 @@ try {
                         export PATH=${ws}/bin:\$PATH
                         gosec -version
                         
-                        ${CMD} || exit 0
+                        ${CMD}
                         """
                     }
                 }
