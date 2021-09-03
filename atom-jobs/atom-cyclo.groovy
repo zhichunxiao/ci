@@ -27,7 +27,7 @@ properties([
                         trim: true
                 ),
                 text(
-                        defaultValue: 'gocyclo -over 10 -avg ./',
+                        defaultValue: 'gocyclo -over 10 -avg ./ || true',
                         name: 'CYCLO_CMD'
                 ),
         ])
@@ -94,7 +94,7 @@ try {
                 stage("Cyclo check") {
                     sh """
                     export PATH=${ws}/go/bin:\$PATH
-                    ${CYCLO_CMD} || exit 0
+                    ${CYCLO_CMD}
                     """
                 }
             }
