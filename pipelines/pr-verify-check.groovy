@@ -41,6 +41,9 @@ class GosecConfig {
     String reportDir;
 }
 
+class CycloConfig {
+    String shellScript;
+}
 
 
 
@@ -81,6 +84,11 @@ def parseGosecConfig(configs) {
     return gosecConfig
 }
 
+def parseCycloConfig(configs) {
+    def cycloConfig = new CycloConfig()
+    cycloConfig.shellScript = configs.cyclo.shellScript.toString()
+    return cycloConfig
+}
 
 
 cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${ghprbActualCommit}/${repo}.tar.gz"
@@ -142,6 +150,16 @@ def codeGosec(gosecConfig) {
     build(job: "atom-gosec", parameters: gosecParams, wait: true)
 }
 
+def codeCyclo(CycloConfig cycloConfig) {
+    cycloParams = [
+            string(name: 'REPO', value: repo),
+            string(name: 'COMMIT_ID', value: ghprbActualCommit),
+            string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
+            text(name: 'CYCLO_CMD', value: cycloConfig.shellScript),
+    ]
+    build(job: "atom-cyclo", parameters: cycloParams, wait: true)
+}
+
 
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
@@ -150,6 +168,7 @@ node("${GO_BUILD_SLAVE}") {
         unitTestConfig = parseUnitTestConfig(configs)
         lintConfig = parseLintConfig(configs)
         gosecConfig = parseGosecConfig(configs)
+        cycloConfig = parseCycloConfig(configs)
         stage("get code") {
             cacheCode()
         }
@@ -165,6 +184,9 @@ node("${GO_BUILD_SLAVE}") {
         }
         jobs["gosec"] = {
             codeGosec(gosecConfig)
+        }
+        jobs["cyclo"] = {
+            codeCyclo(cycloConfig)
         }
         stage("verify") {
             parallel jobs
