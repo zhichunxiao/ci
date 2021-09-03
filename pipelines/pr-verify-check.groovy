@@ -36,6 +36,9 @@ class LintConfig {
    String reportDir;
 }
 
+class CycloConfig {
+    String shellScript;
+}
 
 
 
@@ -67,6 +70,12 @@ def parseLintConfig(configs) {
     lintConfig.reportDir = configs.lint.reportDir.toString()
     lintConfig.shellScript = configs.lint.shellScript.toString()
     return lintConfig
+}
+
+def parseCycloConfig(configs) {
+    def cycloConfig = new CycloConfig()
+    cycloConfig.shellScript = configs.cyclo.shellScript.toString()
+    return cycloConfig
 }
 
 cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${ghprbActualCommit}/${repo}.tar.gz"
@@ -117,6 +126,16 @@ def unitTest(unitTestConfig) {
     build(job: "atom-ut", parameters: buildParams, wait: true)
 }
 
+def codeCyclo(CycloConfig cycloConfig) {
+    cycloParams = [
+            string(name: 'REPO', value: repo),
+            string(name: 'COMMIT_ID', value: ghprbActualCommit),
+            string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
+            text(name: 'CYCLO_CMD', value: cycloConfig.shellScript),
+    ]
+    build(job: "atom-cyclo", parameters: cycloParams, wait: true)
+}
+
 
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
@@ -124,6 +143,7 @@ node("${GO_BUILD_SLAVE}") {
         buildConfig = parseBuildConfig(configs)
         unitTestConfig = parseUnitTestConfig(configs)
         lintConfig = parseLintConfig(configs)
+        cycloConfig = parseCycloConfig(configs)
         stage("get code") {
             cacheCode()
         }
@@ -136,6 +156,9 @@ node("${GO_BUILD_SLAVE}") {
         }
         jobs["uint-test"] = {
             unitTest(unitTestConfig)
+        }
+        jobs["cyclo"] = {
+            codeCyclo(cycloConfig)
         }
         stage("verify") {
             parallel jobs
