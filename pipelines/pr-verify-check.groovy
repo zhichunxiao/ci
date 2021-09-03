@@ -36,6 +36,11 @@ class LintConfig {
    String reportDir;
 }
 
+class GosecConfig {
+    String shellScript;
+    String reportDir;
+}
+
 class CycloConfig {
     String shellScript;
 }
@@ -72,11 +77,19 @@ def parseLintConfig(configs) {
     return lintConfig
 }
 
+def parseGosecConfig(configs) {
+    def gosecConfig = new GosecConfig()
+    gosecConfig.reportDir = configs.gosec.reportDir.toString()
+    gosecConfig.shellScript = configs.gosec.shellScript.toString()
+    return gosecConfig
+}
+
 def parseCycloConfig(configs) {
     def cycloConfig = new CycloConfig()
     cycloConfig.shellScript = configs.cyclo.shellScript.toString()
     return cycloConfig
 }
+
 
 cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${ghprbActualCommit}/${repo}.tar.gz"
 
@@ -126,6 +139,17 @@ def unitTest(unitTestConfig) {
     build(job: "atom-ut", parameters: buildParams, wait: true)
 }
 
+def codeGosec(gosecConfig) {
+    gosecParams = [
+            string(name: 'REPO', value: repo),
+            string(name: 'COMMIT_ID', value: ghprbActualCommit),
+            string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
+            text(name: 'CMD', value: gosecConfig.shellScript),
+            string(name: 'REPORT_DIR', value: gosecConfig.reportDir),
+    ]
+    build(job: "atom-gosec", parameters: gosecParams, wait: true)
+}
+
 def codeCyclo(CycloConfig cycloConfig) {
     cycloParams = [
             string(name: 'REPO', value: repo),
@@ -143,6 +167,7 @@ node("${GO_BUILD_SLAVE}") {
         buildConfig = parseBuildConfig(configs)
         unitTestConfig = parseUnitTestConfig(configs)
         lintConfig = parseLintConfig(configs)
+        gosecConfig = parseGosecConfig(configs)
         cycloConfig = parseCycloConfig(configs)
         stage("get code") {
             cacheCode()
@@ -156,6 +181,9 @@ node("${GO_BUILD_SLAVE}") {
         }
         jobs["uint-test"] = {
             unitTest(unitTestConfig)
+        }
+        jobs["gosec"] = {
+            codeGosec(gosecConfig)
         }
         jobs["cyclo"] = {
             codeCyclo(cycloConfig)
