@@ -179,7 +179,7 @@ node("${GO_BUILD_SLAVE}") {
         jobs["lint"] = {
             codeLint(lintConfig)
         }
-        jobs["uint-test"] = {
+        jobs["unit-test"] = {
             unitTest(unitTestConfig)
         }
         jobs["gosec"] = {
