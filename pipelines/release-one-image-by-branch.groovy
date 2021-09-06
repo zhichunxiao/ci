@@ -17,7 +17,7 @@ properties([
         ]),
         pipelineTriggers([
             parameterizedCron('''
-                H H(0-7)/4 * * * % GIT_BRANCH=sprint/20210830/sprint2;REPO=tiem
+                H H(0-7)/4 * * * % GIT_BRANCH=feature/sprint2/nightlyrun;REPO=tiem
             ''')
         ])
 ])
