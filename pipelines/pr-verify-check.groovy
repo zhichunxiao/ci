@@ -45,6 +45,11 @@ class CycloConfig {
     String shellScript;
 }
 
+class CommonConfig {
+    String shellScript;
+    Env env;
+}
+
 
 
 def getConfig(fileURL) {
@@ -87,6 +92,13 @@ def parseGosecConfig(config) {
 def parseCycloConfig(config) {
     def cycloConfig = new CycloConfig()
     cycloConfig.shellScript = config.shellScript.toString()
+    return cycloConfig
+}
+
+def parseCommonConfig(config) {
+    def commonConfig = new commonConfig()
+    commonConfig.shellScript = config.shellScript.toString()
+    commonConfig.env.image = config.buildEnv.image.toString()
     return cycloConfig
 }
 
@@ -160,6 +172,17 @@ def codeCyclo(CycloConfig cycloConfig) {
     build(job: "atom-cyclo", parameters: cycloParams, wait: true)
 }
 
+def codeCommon(CommonConfig commonConfig) {
+    commonParams = [
+            string(name: 'REPO', value: repo),
+            string(name: 'COMMIT_ID', value: ghprbActualCommit),
+            string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
+            string(name: 'IMAGE', value: commonConfig.env.image),
+            text(name: 'COMMON_CMD', value: commonConfig.shellScript),
+    ]
+    build(job: "atom-common", parameters: commonParams, wait: true)
+}
+
 
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
@@ -200,6 +223,12 @@ node("${GO_BUILD_SLAVE}") {
                     gosecConfig = parseGosecConfig(task)
                     jobs[taskName] = {
                         codeGosec(gosecConfig)
+                    }
+                    break
+                case "common":
+                    commonConfig = parseCommonConfig(task)
+                    jobs[taskName] = {
+                        codeCommon(commonConfig)
                     }
                     break
             }
