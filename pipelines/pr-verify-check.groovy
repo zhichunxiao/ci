@@ -54,39 +54,39 @@ def getConfig(fileURL) {
 }
 
 
-def parseBuildConfig(configs) {
+def parseBuildConfig(config) {
     def buildConfig = new BuildConfig()
-    buildConfig.outputDir = configs.build.outputDir.toString()
-    buildConfig.shellScript = configs.build.shellScript.toString()
+    buildConfig.outputDir = config.outputDir.toString()
+    buildConfig.shellScript = config.shellScript.toString()
     return buildConfig
 }
 
-def parseUnitTestConfig(configs) {
+def parseUnitTestConfig(config) {
     def unitTestConfig = new UnitTestConfig()
-    unitTestConfig.utReportDir = configs.unitTest.utReportDir.toString()
-    unitTestConfig.covReportDir = configs.unitTest.covReportDir.toString()
-    unitTestConfig.shellScript = configs.unitTest.shellScript.toString()
-    unitTestConfig.coverageRate = configs.unitTest.coverageRate.toString()
+    unitTestConfig.utReportDir = config.utReportDir.toString()
+    unitTestConfig.covReportDir = config.covReportDir.toString()
+    unitTestConfig.shellScript = config.shellScript.toString()
+    unitTestConfig.coverageRate = config.coverageRate.toString()
     return unitTestConfig
 }
 
-def parseLintConfig(configs) {
+def parseLintConfig(config) {
     def lintConfig = new LintConfig()
-    lintConfig.reportDir = configs.lint.reportDir.toString()
-    lintConfig.shellScript = configs.lint.shellScript.toString()
+    lintConfig.reportDir = config.reportDir.toString()
+    lintConfig.shellScript = config.shellScript.toString()
     return lintConfig
 }
 
-def parseGosecConfig(configs) {
+def parseGosecConfig(config) {
     def gosecConfig = new GosecConfig()
-    gosecConfig.reportDir = configs.gosec.reportDir.toString()
-    gosecConfig.shellScript = configs.gosec.shellScript.toString()
+    gosecConfig.reportDir = config.reportDir.toString()
+    gosecConfig.shellScript = config.shellScript.toString()
     return gosecConfig
 }
 
-def parseCycloConfig(configs) {
+def parseCycloConfig(config) {
     def cycloConfig = new CycloConfig()
-    cycloConfig.shellScript = configs.cyclo.shellScript.toString()
+    cycloConfig.shellScript = config.shellScript.toString()
     return cycloConfig
 }
 
@@ -164,29 +164,45 @@ def codeCyclo(CycloConfig cycloConfig) {
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
         configs = getConfig(configfile)
-        buildConfig = parseBuildConfig(configs)
-        unitTestConfig = parseUnitTestConfig(configs)
-        lintConfig = parseLintConfig(configs)
-        gosecConfig = parseGosecConfig(configs)
-        cycloConfig = parseCycloConfig(configs)
         stage("get code") {
             cacheCode()
         }
         jobs = [:]
-        jobs["build"] = {
-            buildBinary(buildConfig)
-        }
-        jobs["lint"] = {
-            codeLint(lintConfig)
-        }
-        jobs["unit-test"] = {
-            unitTest(unitTestConfig)
-        }
-        jobs["gosec"] = {
-            codeGosec(gosecConfig)
-        }
-        jobs["cyclo"] = {
-            codeCyclo(cycloConfig)
+        for (task in configs.tasks) {
+            taskType = task.taskType.toString()
+            taskName =task.name.toString()
+            switch(taskType) {
+                case "build":
+                    buildConfig = parseBuildConfig(task)
+                    jobs[taskName] = {
+                        buildBinary(buildConfig)
+                    }
+                    break
+                case "unit-test":
+                    unitTestConfig = parseUnitTestConfig(task)
+                    jobs[taskName] = {
+                        unitTest(unitTestConfig)
+                    }
+                    break
+                case "lint":
+                    lintConfig = parseLintConfig(task)
+                    jobs[taskName] = {
+                        codeLint(lintConfig)
+                    }
+                    break
+                case "cyclo":
+                    cycloConfig = parseCycloConfig(task)
+                    jobs[taskName] = {
+                        codeCyclo(cycloConfig)
+                    }
+                    break
+                case "gosec":
+                    gosecConfig = parseGosecConfig(task)
+                    jobs[taskName] = {
+                        codeGosec(gosecConfig)
+                    }
+                    break
+            }
         }
         stage("verify") {
             parallel jobs
