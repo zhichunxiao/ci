@@ -98,8 +98,9 @@ def parseCycloConfig(config) {
 def parseCommonConfig(config) {
     def commonConfig = new CommonConfig()
     commonConfig.shellScript = config.shellScript.toString()
+    commonConfig.env = new Env()
     commonConfig.env.image = config.buildEnv.image.toString()
-    return cycloConfig
+    return commonConfig
 }
 
 
