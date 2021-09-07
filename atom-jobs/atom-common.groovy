@@ -40,10 +40,10 @@ properties([
 
 
 def run_with_pod(Closure body) {
-    def label = "circle-complexity-atom-job"
+    def label = "common-atom-job"
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
-    def pod_go_docker_image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
+    def pod_go_docker_image = "hub.pingcap.net/jenkins/centos7_golang-1.16:latest"
     if (IMAGE.length() > 2) {
         pod_go_docker_image = IMAGE
     }
