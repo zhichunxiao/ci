@@ -31,6 +31,11 @@ properties([
                         name: 'IMAGE',
                         trim: true
                 ),
+                string(
+                        defaultValue: '',
+                        name: 'ghprbTargetBranch',
+                        trim: true
+                ),
                 text(
                         defaultValue: 'echo success',
                         name: 'COMMON_CMD'
