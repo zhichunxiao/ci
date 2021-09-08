@@ -174,11 +174,16 @@ def codeCyclo(CycloConfig cycloConfig) {
 }
 
 def codeCommon(CommonConfig commonConfig) {
+    def image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
+    if (commonConfig.env.image != null && commonConfig.env.image != "") {
+        image = commonConfig.env.image
+    }
     commonParams = [
             string(name: 'REPO', value: repo),
             string(name: 'COMMIT_ID', value: ghprbActualCommit),
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
-            string(name: 'IMAGE', value: commonConfig.env.image),
+            string(name: 'IMAGE', value: image),
+            string(name: 'TARGET_BRANCH', value: ghprbTargetBranch),
             text(name: 'COMMON_CMD', value: commonConfig.shellScript),
     ]
     build(job: "atom-common", parameters: commonParams, wait: true)
