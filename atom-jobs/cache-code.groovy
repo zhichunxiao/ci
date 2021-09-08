@@ -45,16 +45,17 @@ properties([
 
 
 repoUrlMap = [
-        tidb    : 'git@github.com:pingcap/tidb.git',
-        tikv    : 'git@github.com:tikv/tikv.git',
-        pd      : 'git@github.com:tikv/pd.git',
-        cdc     : 'git@github.com:pingcap/ticdc.git',
-        br      : 'git@github.com:pingcap/br.git',
-        dumpling: 'git@github.com:pingcap/dumpling.git',
-        binlog  : 'git@github.com:pingcap/tidb-binlog.git',
-        dm      : 'git@github.com:pingcap/dm.git',
-        tics    : 'git@github.com:pingcap/tics.git',
-        tiem    : 'git@github.com:pingcap-inc/tiem.git'
+        "tidb"    : 'git@github.com:pingcap/tidb.git',
+        "tikv"    : 'git@github.com:tikv/tikv.git',
+        "pd"      : 'git@github.com:tikv/pd.git',
+        "cdc"     : 'git@github.com:pingcap/ticdc.git',
+        "br"      : 'git@github.com:pingcap/br.git',
+        "dumpling": 'git@github.com:pingcap/dumpling.git',
+        "binlog"  : 'git@github.com:pingcap/tidb-binlog.git',
+        "dm"      : 'git@github.com:pingcap/dm.git',
+        "tics"    : 'git@github.com:pingcap/tics.git',
+        "tiem"    : 'git@github.com:pingcap-inc/tiem.git',
+        "docs-cn" : 'git@github.com:pingcap/docs-cn.git'
 ]
 
 def repoValid = repoUrlMap.containsKey(REPO)

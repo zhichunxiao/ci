@@ -51,7 +51,7 @@ def release_one(repo,failpoint) {
         sha1 = TIKV_BUMPVERION_HASH
     }
     if (repo == "monitoring") {
-        sha1 =  get_sha(actualRepo,"master")
+        sha1 =  get_sha(actualRepo,RELEASE_BRANCH)
     }
     def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
     if (failpoint) {

@@ -197,37 +197,37 @@ node("${GO_BUILD_SLAVE}") {
             taskName =task.name.toString()
             switch(taskType) {
                 case "build":
-                    buildConfig = parseBuildConfig(task)
+                    def buildConfig = parseBuildConfig(task)
                     jobs[taskName] = {
                         buildBinary(buildConfig)
                     }
                     break
                 case "unit-test":
-                    unitTestConfig = parseUnitTestConfig(task)
+                    def unitTestConfig = parseUnitTestConfig(task)
                     jobs[taskName] = {
                         unitTest(unitTestConfig)
                     }
                     break
                 case "lint":
-                    lintConfig = parseLintConfig(task)
+                    def lintConfig = parseLintConfig(task)
                     jobs[taskName] = {
                         codeLint(lintConfig)
                     }
                     break
-                case "cyclo":
-                    cycloConfig = parseCycloConfig(task)
+                case "cyclo": 
+                    def cycloConfig = parseCycloConfig(task)
                     jobs[taskName] = {
                         codeCyclo(cycloConfig)
                     }
                     break
                 case "gosec":
-                    gosecConfig = parseGosecConfig(task)
+                    def gosecConfig = parseGosecConfig(task)
                     jobs[taskName] = {
                         codeGosec(gosecConfig)
                     }
                     break
                 case "common":
-                    commonConfig = parseCommonConfig(task)
+                    def commonConfig = parseCommonConfig(task)
                     jobs[taskName] = {
                         codeCommon(commonConfig)
                     }
