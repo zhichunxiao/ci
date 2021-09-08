@@ -1,6 +1,6 @@
 /*
 * input
-* @REPO(string: github repo name, Required)
+* @ORG_AND_REPO(string: github repo name with org, Required)
 * @PULL_ID(int: pull request id, Optional)
 * @COMMIT_ID(string: commit id request id, Required)
 * @BRANCH(string: branch name, Optional)
@@ -11,7 +11,7 @@
 * @CACHE_CODE_SHA256_URL(string: cache code tar file sha256 sum file url)
 *
 * doc
-* https://docs.google.com/document/d/1hcs4F6BUKiiLHetLMXM2323_J5_yLdG5OyXddNt2-Vk/edit?usp=sharing
+* https://docs.google.com/document/d/10uezCPKNQIYMDybJ_HZfcq29gnDr8-cvEk4gSIqc4X8/edit?usp=sharing
 */
 
 properties([
