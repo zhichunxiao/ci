@@ -108,7 +108,7 @@ cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${re
 
 def cacheCode() {
     cacheCodeParams = [
-        string(name: 'REPO', value: repo),
+        string(name: 'ORG_AND_REPO', value: ghprbGhRepository),
         string(name: 'COMMIT_ID', value: ghprbActualCommit),
         string(name: 'PULL_ID', value: ghprbPullId),
     ]

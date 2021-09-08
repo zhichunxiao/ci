@@ -18,7 +18,7 @@ properties([
     parameters([
         string(
             defaultValue: '',
-            name: 'REPO',
+            name: 'ORG_AND_REPO',
             trim: true
         ),
         string(
@@ -43,23 +43,14 @@ properties([
     ])
 ])
 
+ORG = ""
+REPO = ""
+repoInfo = ORG_AND_REPO.split("/")
+if (repoInfo.length == 2) {
+    REPO = repoInfo[1]
+    ORG = repoInfo[0]
+}
 
-repoUrlMap = [
-        "tidb"    : 'git@github.com:pingcap/tidb.git',
-        "tikv"    : 'git@github.com:tikv/tikv.git',
-        "pd"      : 'git@github.com:tikv/pd.git',
-        "cdc"     : 'git@github.com:pingcap/ticdc.git',
-        "br"      : 'git@github.com:pingcap/br.git',
-        "dumpling": 'git@github.com:pingcap/dumpling.git',
-        "binlog"  : 'git@github.com:pingcap/tidb-binlog.git',
-        "dm"      : 'git@github.com:pingcap/dm.git',
-        "tics"    : 'git@github.com:pingcap/tics.git',
-        "tiem"    : 'git@github.com:pingcap-inc/tiem.git',
-        "docs-cn" : 'git@github.com:pingcap/docs-cn.git'
-]
-
-def repoValid = repoUrlMap.containsKey(REPO)
-assert repoValid
 
 def run_with_pod(Closure body) {
     def label = "cache-code-atom-job"
@@ -78,8 +69,6 @@ def run_with_pod(Closure body) {
                             resourceRequestCpu: '2000m', resourceRequestMemory: '2Gi',
                             resourceLimitCpu: '4000m', resourceLimitMemory: "4Gi",
                             command: '/bin/sh -c', args: 'cat',
-                            envVars: [containerEnvVar(key: 'GOMODCACHE', value: '/nfs/cache/mod'),
-                                      containerEnvVar(key: 'GOPATH', value: '/go')],
                     ),
                     containerTemplate(
                             name: 'jnlp', image: "${jnlp_docker_image}", alwaysPullImage: false,
@@ -89,8 +78,6 @@ def run_with_pod(Closure body) {
             volumes: [
                     nfsVolume(mountPath: '/home/jenkins/agent/ci-cached-code-daily', serverAddress: '172.16.5.22',
                             serverPath: '/mnt/ci.pingcap.net-nfs/git', readOnly: false),
-                    nfsVolume(mountPath: '/nfs/cache', serverAddress: '172.16.5.22',
-                            serverPath: '/mnt/ci.pingcap.net-nfs', readOnly: false),
             ],
     ) {
         node(label) {
@@ -130,8 +117,9 @@ def checkoutCode() {
         resSpec = "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}"
     }
 
+    def repo_ssh_url = "git@github.com:${ORG_AND_REPO}.git"
     try {
-        doCheckout(repoUrlMap[REPO], COMMIT_ID, resSpec)
+        doCheckout(repo_ssh_url, COMMIT_ID, resSpec)
     } catch (info) {
         retry(2) {
             echo "checkout failed, retry.."
@@ -166,6 +154,7 @@ try {
                     def repoDailyCache = "/home/jenkins/agent/ci-cached-code-daily/src-${REPO}.tar.gz"
                     container("golang") {
                         if (fileExists(repoDailyCache)) {
+                            println "get code from nfs to reduce clone time"
                             timeout(2) {
                                 sh """
                                 cp -R ${repoDailyCache}*  ./
@@ -173,7 +162,7 @@ try {
                                 tar -xzf src-${REPO}.tar.gz -C ${ws}/${REPO} --strip-components=1
                                 """
                             }
-                        }
+                        } 
                     }
                 }
                 dir("${ws}/${REPO}") {
