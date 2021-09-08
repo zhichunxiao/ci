@@ -183,7 +183,7 @@ def codeCommon(CommonConfig commonConfig) {
             string(name: 'COMMIT_ID', value: ghprbActualCommit),
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
             string(name: 'IMAGE', value: image),
-            string(name: 'ghprbTargetBranch', value: ghprbTargetBranch),
+            string(name: 'TARGET_BRANCH', value: ghprbTargetBranch),
             text(name: 'COMMON_CMD', value: commonConfig.shellScript),
     ]
     build(job: "atom-common", parameters: commonParams, wait: true)

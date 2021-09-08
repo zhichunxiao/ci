@@ -33,7 +33,7 @@ properties([
                 ),
                 string(
                         defaultValue: '',
-                        name: 'ghprbTargetBranch',
+                        name: 'TARGET_BRANCH',
                         trim: true
                 ),
                 text(
