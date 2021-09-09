@@ -47,7 +47,7 @@ gocov convert cover.out | gocov-xml > coverage.xml
 ])
 
 def run_with_pod(Closure body) {
-    def label = "atom-ut-atom-job"
+    def label = "atom-ut-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
     def pod_go_docker_image = 'hub-new.pingcap.net/jenkins/centos7_golang-1.16'
