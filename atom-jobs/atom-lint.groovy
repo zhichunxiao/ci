@@ -39,7 +39,7 @@ LINT_CONFIG_URL = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/ma
 
 
 def run_with_pod(Closure body) {
-    def label = "cache-code-atom-job"
+    def label = "lint-check-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
     def pod_go_docker_image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"

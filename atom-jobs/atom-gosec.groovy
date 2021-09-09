@@ -34,7 +34,7 @@ properties([
 ])
 
 def run_with_pod(Closure body) {
-    def label = "gosec-check-atom-job"
+    def label = "gosec-check-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
     def pod_go_docker_image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
