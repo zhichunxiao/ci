@@ -109,9 +109,9 @@ def getBlueOceanLink(obj, jobName) {
 
     if(obj instanceof Exception) {
         obj.toString().split(" ").each {
-        if(it.contains("#")) {
-            buildNumber = it.substring(1)
-        }
+            if(it.contains("#")) {
+                buildNumber = it.substring(1)
+            }
         }
     } else if(obj instanceof org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper) {
         buildNumber = obj.getNumber()
@@ -141,7 +141,7 @@ def cacheCode() {
         string(name: 'COMMIT_ID', value: ghprbActualCommit),
         string(name: 'PULL_ID', value: ghprbPullId),
     ]
-    linkBuild(job: "cache-code", parameters: cacheCodeParams)
+    linkBuild("cache-code", cacheCodeParams)
 }
 
 def buildBinary(buildConfig) {
@@ -153,7 +153,7 @@ def buildBinary(buildConfig) {
         string(name: 'BUILD_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
         string(name: 'OUTPUT_DIR', value: "bin"),
     ]
-    linkBuild(job: "atom-build", parameters: buildParams)
+    linkBuild("atom-build", buildParams)
 }
 
 def codeLint(lintConfig) {
@@ -164,7 +164,7 @@ def codeLint(lintConfig) {
         text(name: 'LINT_CMD', value: lintConfig.shellScript),
         string(name: 'REPORT_DIR', value: lintConfig.reportDir),
     ]
-    linkBuild(job: "atom-lint", parameters: lintParams)
+    linkBuild("atom-lint", lintParams)
 }
 
 def unitTest(unitTestConfig) {
@@ -178,7 +178,7 @@ def unitTest(unitTestConfig) {
         string(name: 'COVERAGE_RATE', value: unitTestConfig.coverageRate),
         string(name: 'TEST_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
     ]
-    linkBuild(job: "atom-ut", parameters: buildParams)
+    linkBuild("atom-ut", buildParams)
 }
 
 def codeGosec(gosecConfig) {
@@ -189,7 +189,7 @@ def codeGosec(gosecConfig) {
             text(name: 'CMD', value: gosecConfig.shellScript),
             string(name: 'REPORT_DIR', value: gosecConfig.reportDir),
     ]
-    linkBuild(job: "atom-gosec", parameters: gosecParams)
+    linkBuild("atom-gosec", gosecParams)
 }
 
 def codeCyclo(CycloConfig cycloConfig) {
@@ -199,7 +199,7 @@ def codeCyclo(CycloConfig cycloConfig) {
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
             text(name: 'CYCLO_CMD', value: cycloConfig.shellScript),
     ]
-    linkBuild(job: "atom-cyclo", parameters: cycloParams)
+    linkBuild("atom-cyclo", cycloParams)
 }
 
 def codeCommon(CommonConfig commonConfig) {
@@ -215,7 +215,7 @@ def codeCommon(CommonConfig commonConfig) {
             string(name: 'TARGET_BRANCH', value: ghprbTargetBranch),
             text(name: 'COMMON_CMD', value: commonConfig.shellScript),
     ]
-    linkBuild(job: "atom-common", parameters: commonParams)
+    linkBuild("atom-common", commonParams)
 }
 
 node("${GO_BUILD_SLAVE}") {
