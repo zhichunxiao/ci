@@ -104,6 +104,35 @@ def parseCommonConfig(config) {
 }
 
 
+def getBlueOceanLink(obj, jobName) {
+    def buildNumber
+
+    if(obj instanceof Exception) {
+        obj.toString().split(" ").each {
+            if(it.contains("#")) {
+                buildNumber = it.substring(1)
+            }
+        }
+    } else if(obj instanceof org.jenkinsci.plugins.workflow.support.steps.build.RunWrapper) {
+        buildNumber = obj.getNumber()
+    } else {
+        return "Can not determine Blue Ocean link!!!"
+    }
+
+    return "For detailed information see: https://ci.pingcap.net/blue/organizations/jenkins/${jobName}/detail/${jobName}/${buildNumber}/pipeline"
+}
+
+def linkBuild(job, parameters) {
+    def buildInfo
+    try {
+        buildInfo = build(job: job, parameters: parameters, wait: true, propagate: true)
+    } catch (Exception e) {
+        println getBlueOceanLink(e, job)
+        throw e
+    }
+    println getBlueOceanLink(buildInfo, job)
+}
+
 cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${ghprbActualCommit}/${repo}.tar.gz"
 
 def cacheCode() {
@@ -112,7 +141,7 @@ def cacheCode() {
         string(name: 'COMMIT_ID', value: ghprbActualCommit),
         string(name: 'PULL_ID', value: ghprbPullId),
     ]
-    build(job: "cache-code", parameters: cacheCodeParams, wait: true)
+    linkBuild("cache-code", cacheCodeParams)
 }
 
 def buildBinary(buildConfig) {
@@ -124,7 +153,7 @@ def buildBinary(buildConfig) {
         string(name: 'BUILD_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
         string(name: 'OUTPUT_DIR', value: "bin"),
     ]
-    build(job: "atom-build", parameters: buildParams, wait: true)
+    linkBuild("atom-build", buildParams)
 }
 
 def codeLint(lintConfig) {
@@ -135,7 +164,7 @@ def codeLint(lintConfig) {
         text(name: 'LINT_CMD', value: lintConfig.shellScript),
         string(name: 'REPORT_DIR', value: lintConfig.reportDir),
     ]
-    build(job: "atom-lint", parameters: lintParams, wait: true)
+    linkBuild("atom-lint", lintParams)
 }
 
 def unitTest(unitTestConfig) {
@@ -149,7 +178,7 @@ def unitTest(unitTestConfig) {
         string(name: 'COVERAGE_RATE', value: unitTestConfig.coverageRate),
         string(name: 'TEST_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
     ]
-    build(job: "atom-ut", parameters: buildParams, wait: true)
+    linkBuild("atom-ut", buildParams)
 }
 
 def codeGosec(gosecConfig) {
@@ -160,7 +189,7 @@ def codeGosec(gosecConfig) {
             text(name: 'CMD', value: gosecConfig.shellScript),
             string(name: 'REPORT_DIR', value: gosecConfig.reportDir),
     ]
-    build(job: "atom-gosec", parameters: gosecParams, wait: true)
+    linkBuild("atom-gosec", gosecParams)
 }
 
 def codeCyclo(CycloConfig cycloConfig) {
@@ -170,7 +199,7 @@ def codeCyclo(CycloConfig cycloConfig) {
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
             text(name: 'CYCLO_CMD', value: cycloConfig.shellScript),
     ]
-    build(job: "atom-cyclo", parameters: cycloParams, wait: true)
+    linkBuild("atom-cyclo", cycloParams)
 }
 
 def codeCommon(CommonConfig commonConfig) {
@@ -186,9 +215,8 @@ def codeCommon(CommonConfig commonConfig) {
             string(name: 'TARGET_BRANCH', value: ghprbTargetBranch),
             text(name: 'COMMON_CMD', value: commonConfig.shellScript),
     ]
-    build(job: "atom-common", parameters: commonParams, wait: true)
+    linkBuild("atom-common", commonParams)
 }
-
 
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
