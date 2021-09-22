@@ -20,7 +20,7 @@ try {
             configs = common.getConfig(configfile)
 
             stage("get code") {
-                common.cacheCode(repo,COMMIT_ID,BRANCH,"")
+                common.cacheCode(REPO,COMMIT_ID,BRANCH,"")
             }
             jobs = [:]
             for (task in configs.tasks) {
