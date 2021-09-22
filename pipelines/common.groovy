@@ -216,3 +216,4 @@ def codeCommon(commonConfig,repo,commitID,branch) {
     ]
     build(job: "atom-common", parameters: commonParams, wait: true)
 }
+return this
