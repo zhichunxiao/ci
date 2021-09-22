@@ -551,6 +551,7 @@ def release() {
 stage("Build ${PRODUCT}") {
     node(nodeLabel) {
         dir("go/src/github.com/pingcap/${PRODUCT}") {
+            deleteDir()
             if (containerLabel != "") {
                 container(containerLabel){
                     release()
