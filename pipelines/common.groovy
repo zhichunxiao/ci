@@ -204,7 +204,7 @@ def codeCommon(commonConfig,repo,commitID,branch) {
     script = commonConfig.shellScript
     for (sVar in commonConfig.secretVars) {
         secretVars.push(sVar.secretID + ":" + sVar.key)
-        script.replaceAll("\$\\{" + sVar.key + "\\}" , "\\\$" + sVar.key) 
+        script = script.replaceAll("\$\\{" + sVar.key + "\\}" , "\\\$" + sVar.key) 
     }
     secretVarsString = secretVars.join(",")
     commonParams = [
