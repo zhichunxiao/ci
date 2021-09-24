@@ -201,8 +201,10 @@ def codeCommon(commonConfig,repo,commitID,branch) {
         image = commonConfig.env.image
     }
     secretVars = []
+    script = commonConfig.shellScript
     for (sVar in commonConfig.secretVars) {
-        secretVars.push(sVar.secretID + ":" + sVar.key) 
+        secretVars.push(sVar.secretID + ":" + sVar.key)
+        script.replaceAll("$\{" sVar.key + "\}" , "/$" + sVar.key) 
     }
     secretVarsString = secretVars.join(",")
     commonParams = [
@@ -212,7 +214,7 @@ def codeCommon(commonConfig,repo,commitID,branch) {
             string(name: 'IMAGE', value: image),
             string(name: 'TARGET_BRANCH', value: branch),
             string(name: 'SECRET_VARS', value: secretVarsString),
-            text(name: 'COMMON_CMD', value: commonConfig.shellScript),
+            text(name: 'COMMON_CMD', value: script),
     ]
     build(job: "atom-common", parameters: commonParams, wait: true)
 }
