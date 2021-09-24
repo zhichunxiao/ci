@@ -10,7 +10,7 @@ if (REF.startsWith("refs/heads/")) {
     BRANCH = REF.replaceAll("refs/heads/","")
 }
 
-def configfile = "https://raw.githubusercontent.com/dianqihanwangzi/devops-config/merge-ci/${repo}/merge.yaml"
+def configfile = "https://raw.githubusercontent.com/YiniXu9506/devops-config/addBuildPDFYaml/${repo}/merge.yaml"
 
 try {
     node("${GO_BUILD_SLAVE}") {
