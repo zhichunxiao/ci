@@ -217,6 +217,6 @@ def codeCommon(commonConfig,repo,commitID,branch) {
             string(name: 'SECRET_VARS', value: secretVarsString),
             text(name: 'COMMON_CMD', value: script),
     ]
-    build(job: "atom-common", parameters: commonParams, wait: true)
+    build(job: "atom-common-test", parameters: commonParams, wait: true)
 }
 return this
