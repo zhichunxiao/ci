@@ -201,11 +201,12 @@ def codeCommon(commonConfig,repo,commitID,branch) {
         image = commonConfig.env.image
     }
     secretVars = []
-    script = commonConfig.shellScript
+    def script = commonConfig.shellScript
     for (sVar in commonConfig.secretVars) {
         secretVars.push(sVar.secretID + ":" + sVar.key)
         script = script.replaceAll("\$\\{" + sVar.key + "\\}" , "\\\$" + sVar.key) 
     }
+    echo script
     secretVarsString = secretVars.join(",")
     commonParams = [
             string(name: 'REPO', value: repo),
