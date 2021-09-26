@@ -10,7 +10,7 @@ if (REF.startsWith("refs/heads/")) {
     BRANCH = REF.replaceAll("refs/heads/","")
 }
 
-def configfile = "https://raw.githubusercontent.com/YiniXu9506/devops-config/addBuildPDFYaml/${repo}/merge.yaml"
+def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/main/${repo}/merge.yaml"
 
 try {
     node("${GO_BUILD_SLAVE}") {
@@ -97,38 +97,38 @@ catch (Exception e) {
     }
 }
 
-// node("github-status-updater") {
-//     stage("Update commit status") {
-//         container("github-status-updater") {
-//             if (currentBuild.result == "ABORTED") {
-//                 DESCRIPTION = 'Jenkins job aborted'
-//                 // Commit state. Possible values are 'pending', 'success', 'error' or 'failure'
-//                 STATUS = 'error'
-//             } else if (currentBuild.result == "FAILURE") {
-//                 DESCRIPTION = 'Jenkins job failed'
-//                 STATUS = 'failure'
-//             } else if (currentBuild.result == "SUCCESS") {
-//                 DESCRIPTION = 'Jenkins job success'
-//                 STATUS = 'success'
-//             } else {
-//                 DESCRIPTION = 'Jenkins job meets something wrong'
-//                 STATUS = 'error'
-//             }
-//             withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
-//                 sh '''
-//                 set +x
-//                 github-status-updater \
-//                     -action update_state \
-//                     -token ${TOKEN} \
-//                     -owner ${org} \
-//                     -repo ${repo} \
-//                     -ref  ${COMMIT_ID} \
-//                     -state ${STATUS} \
-//                     -context ${repo}/merge-ci \
-//                     -description "${DESCRIPTION}" \
-//                     -url "${RUN_DISPLAY_URL}"
-//                 '''
-//             }
-//         }
-//     }
-// }
+node("github-status-updater") {
+    stage("Update commit status") {
+        container("github-status-updater") {
+            if (currentBuild.result == "ABORTED") {
+                DESCRIPTION = 'Jenkins job aborted'
+                // Commit state. Possible values are 'pending', 'success', 'error' or 'failure'
+                STATUS = 'error'
+            } else if (currentBuild.result == "FAILURE") {
+                DESCRIPTION = 'Jenkins job failed'
+                STATUS = 'failure'
+            } else if (currentBuild.result == "SUCCESS") {
+                DESCRIPTION = 'Jenkins job success'
+                STATUS = 'success'
+            } else {
+                DESCRIPTION = 'Jenkins job meets something wrong'
+                STATUS = 'error'
+            }
+            withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
+                sh '''
+                set +x
+                github-status-updater \
+                    -action update_state \
+                    -token ${TOKEN} \
+                    -owner ${org} \
+                    -repo ${repo} \
+                    -ref  ${COMMIT_ID} \
+                    -state ${STATUS} \
+                    -context ${repo}/merge-ci \
+                    -description "${DESCRIPTION}" \
+                    -url "${RUN_DISPLAY_URL}"
+                '''
+            }
+        }
+    }
+}
