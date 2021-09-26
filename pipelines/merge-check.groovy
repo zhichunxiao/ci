@@ -74,7 +74,7 @@ try {
 } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
     println e
     // this ambiguous condition means a user probably aborted
-    currentBuild.result = "ABORTED"
+    currentBuild.result = "FAILURE"
 } catch (hudson.AbortException e) {
     println e
     // this ambiguous condition means during a shell step, user probably aborted
