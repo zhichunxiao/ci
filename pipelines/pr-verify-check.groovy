@@ -12,8 +12,6 @@ node("${GO_BUILD_SLAVE}") {
         checkout scm
         def common = load "pipelines/common.groovy"
         configs = common.getConfig(configfile)
-        
-        configs = common.getConfig(configfile)
         stage("get code") {
             common.cacheCode(ghprbGhRepository,ghprbActualCommit,"",ghprbPullId)
         }
