@@ -36,6 +36,11 @@ properties([
                         name: 'TARGET_BRANCH',
                         trim: true
                 ),
+                string(
+                        defaultValue: '',
+                        name: 'SECRET_VARS',
+                        trim: true
+                ),
                 text(
                         defaultValue: 'echo success',
                         name: 'COMMON_CMD'
@@ -97,9 +102,18 @@ try {
                     curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1
                     """
                 }
-
-                stage("common task") {
-                    sh COMMON_CMD
+                credentialList =[]
+                varStrings = SECRET_VARS.split(",")
+                for (varString in varStrings) {
+                    keyAndValue = varString.split(":")
+                    if (keyAndValue.length == 2) {
+                        credentialList.push(string(credentialsId: keyAndValue[0], variable: keyAndValue[1]))
+                    }
+                }
+                withCredentials(credentialList) {
+                    stage("common task") {
+                        sh COMMON_CMD
+                    }
                 }
             }
             currentBuild.result = "SUCCESS"
