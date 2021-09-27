@@ -114,9 +114,20 @@ node("github-status-updater") {
                 DESCRIPTION = 'Jenkins job meets something wrong'
                 STATUS = 'error'
             }
+            sh """
+        cat > env_param.conf <<EOF
+export org=${org}
+export repo=${repo}
+export COMMIT_ID="${COMMIT_ID}"
+export STATUS="${STATUS}"
+export DESCRIPTION="${DESCRIPTION}"
+export DESCRIPTION="${DESCRIPTION}"
+EOF
+            """
             withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
-                sh '''
+                sh '''#!/bin/bash
                 set +x
+                source env_param.conf
                 github-status-updater \
                     -action update_state \
                     -token ${TOKEN} \
