@@ -182,6 +182,16 @@ if (params.GIT_PR.length() >= 1) {
    specRef = "+refs/pull/${GIT_PR}/*:refs/remotes/origin/pr/${GIT_PR}/*"
 }
 def checkoutCode() {
+    def repoDailyCache = "/nfs/cache/git/src-${REPO}.tar.gz"
+    if (fileExists(repoDailyCache)) {
+        println "get code from nfs to reduce clone time"
+        sh """
+        cp -R ${repoDailyCache}  ./
+        tar -xzf ${repoDailyCache} --strip-components=1
+        rm -f src-${REPO}.tar.gz
+        """
+        sh "chown -R 1000:1000 ./"
+    }    
     checkout changelog: false, poll: true,
                     scm: [$class: 'GitSCM', branches: [[name: "${GIT_HASH}"]], doGenerateSubmoduleConfigurations: false,
                         extensions: [[$class: 'CheckoutOption', timeout: 30],
