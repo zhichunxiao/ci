@@ -116,6 +116,14 @@ def parseCommonConfig(config) {
     return commonConfig
 }
 
+def triggerTask(taskName,params) {
+    result = build(job: taskName, parameters: params, wait: true,propagate: false)
+    echo "log url: " + result.getAbsoluteUrl() + "console"
+    if (result.getResult() != "SUCCESS") {
+        throw new Exception("task failed")
+    }
+}
+
 
 def cacheCode(repo,commitID,branch,prID) {
     cacheCodeParams = [
@@ -128,9 +136,7 @@ def cacheCode(repo,commitID,branch,prID) {
     if (prID != "" && prID != null ) {
         cacheCodeParams.push(string(name: 'PULL_ID', value: prID))
     }
-    result = build(job: "cache-code", parameters: cacheCodeParams, wait: true,propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("cache-code",cacheCodeParams)
 }
 
 def buildBinary(buildConfig,repo,commitID) {
@@ -143,9 +149,7 @@ def buildBinary(buildConfig,repo,commitID) {
         string(name: 'BUILD_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
         string(name: 'OUTPUT_DIR', value: "bin"),
     ]
-    result = build(job: "atom-build", parameters: buildParams, wait: true, propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("atom-build",buildParams)
 }
 
 def codeLint(lintConfig,repo, commitID) {
@@ -157,14 +161,12 @@ def codeLint(lintConfig,repo, commitID) {
         text(name: 'LINT_CMD', value: lintConfig.shellScript),
         string(name: 'REPORT_DIR', value: lintConfig.reportDir),
     ]
-    result = build(job: "atom-lint", parameters: lintParams, wait: true, propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("atom-lint",lintParams)
 }
 
 def unitTest(unitTestConfig,repo,commitID) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
-    buildParams = [
+    utParams = [
         string(name: 'REPO', value: repo),
         string(name: 'COMMIT_ID', value: commitID),
         string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
@@ -174,9 +176,7 @@ def unitTest(unitTestConfig,repo,commitID) {
         string(name: 'COVERAGE_RATE', value: unitTestConfig.coverageRate),
         string(name: 'TEST_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
     ]
-    result = build(job: "atom-ut", parameters: buildParams, wait: true, propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("atom-ut",utParams)
 }
 
 def codeGosec(gosecConfig,repo,commitID) {
@@ -188,9 +188,7 @@ def codeGosec(gosecConfig,repo,commitID) {
             text(name: 'CMD', value: gosecConfig.shellScript),
             string(name: 'REPORT_DIR', value: gosecConfig.reportDir),
     ]
-    result = build(job: "atom-gosec", parameters: gosecParams, wait: true, propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("atom-gosec",gosecParams)
 }
 
 def codeCyclo(cycloConfig,repo,commitID) {
@@ -201,9 +199,7 @@ def codeCyclo(cycloConfig,repo,commitID) {
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
             text(name: 'CYCLO_CMD', value: cycloConfig.shellScript),
     ]
-    result = build(job: "atom-cyclo", parameters: cycloParams, wait: true, propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("atom-cyclo",cycloParams)
 }
 
 def codeCommon(commonConfig,repo,commitID,branch) {
@@ -228,8 +224,6 @@ def codeCommon(commonConfig,repo,commitID,branch) {
             string(name: 'SECRET_VARS', value: secretVarsString),
             text(name: 'COMMON_CMD', value: script),
     ]
-    result = build(job: "atom-common", parameters: commonParams, wait: true, propagate: false)
-    echo result.getAbsoluteUrl()
-    echo result.getResult()
+    triggerTask("atom-common",commonParams)
 }
 return this
