@@ -4,23 +4,31 @@ properties([
 
 tcmsHost = "https://tcms.pingcap.net/"
 
-def getStartOfLastDayTimeStamp() {
-    Calendar calendar = Calendar.getInstance()
-    int year = calendar.get(Calendar.YEAR)
-    int month = calendar.get(Calendar.MONTH)
-    int day = calendar.get(Calendar.DATE)
-    calendar.set(year, month, day-1, 0, 0, 0)
-    long approximateTimestamp = calendar.getTime().getTime()
-    ts = approximateTimestamp/1000
-    tsString = ts.intValue().toString()
-    return tsString
+now = Calendar.getInstance().getTime().getTime()/1000
+timestamp = now.intValue().toString()
+triggerCI = httpRequest url: tcmsHost + "api/v1/dailyci/trigger", httpMode: 'POST'
+ciResp = readJSON text: triggerCI.content
+id = ciResp["id"].toString()
+ciFinished = false
+ciDuration = 0
+while(!ciFinished) {
+    sleep(300)
+    ciDuration = ciDuration +300
+    // ci breaks when timeout(23 hours)
+    if (ciDuration > 82800) {
+        throw new Exception("ci timeout")
+        break
+    }
+    statusCI = httpRequest tcmsHost + "api/v1/dailyci/trigger/" + id
+    statusResp = readJSON text: statusCI.content
+    ciFinished = statusResp["finished"].toBoolean()
 }
+
 
 def response = httpRequest tcmsHost + "api/v1/plans/branchs"
 def branches = readJSON text: response.content
 for (b in branches) {
     branch= b.toString()
-    timestamp = getStartOfLastDayTimeStamp()
     node(GO_BUILD_SLAVE){
         container("golang"){
             stage("branch: "+ branch + " daily ci result") {
