@@ -1,5 +1,5 @@
 properties([
-    pipelineTriggers([cron('H 7 * * *')]),
+    pipelineTriggers([cron('H 0 * * *')]),
 ])
 
 tcmsHost = "https://tcms.pingcap.net/"
@@ -9,18 +9,20 @@ ciResp = readJSON text: triggerCI.content
 id = ciResp["id"].toString()
 ciFinished = false
 ciDuration = 0
-while(!ciFinished) {
-    sleep(300)
-    ciDuration = ciDuration +300
-    // ci breaks when timeout(23 hours)
-    if (ciDuration > 82800) {
-        break
-    }
-    statusCI = httpRequest tcmsHost + "api/v1/dailyci/trigger/" + id
-    statusResp = readJSON text: statusCI.content
-    ciFinished = statusResp["finished"].toBoolean()
-}
 
+stage("Wait for completion") {
+    while(!ciFinished) {
+        sleep(300)
+        ciDuration = ciDuration +300
+        // ci breaks when timeout(23 hours)
+        if (ciDuration > 82800) {
+            break
+        }
+        statusCI = httpRequest tcmsHost + "api/v1/dailyci/trigger/" + id
+        statusResp = readJSON text: statusCI.content
+        ciFinished = statusResp["finished"].toBoolean()
+    }
+}
 
 def response = httpRequest tcmsHost + "api/v1/plans/branchs"
 def branches = readJSON text: response.content
