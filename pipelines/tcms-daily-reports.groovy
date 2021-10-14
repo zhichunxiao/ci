@@ -4,8 +4,6 @@ properties([
 
 tcmsHost = "https://tcms.pingcap.net/"
 
-now = Calendar.getInstance().getTime().getTime()/1000
-timestamp = now.intValue().toString()
 triggerCI = httpRequest url: tcmsHost + "api/v1/dailyci/trigger", httpMode: 'POST'
 ciResp = readJSON text: triggerCI.content
 id = ciResp["id"].toString()
@@ -16,7 +14,6 @@ while(!ciFinished) {
     ciDuration = ciDuration +300
     // ci breaks when timeout(23 hours)
     if (ciDuration > 82800) {
-        throw new Exception("ci timeout")
         break
     }
     statusCI = httpRequest tcmsHost + "api/v1/dailyci/trigger/" + id
@@ -33,7 +30,7 @@ for (b in branches) {
         container("golang"){
             stage("branch: "+ branch + " daily ci result") {
                 sh """
-                curl -o ${branch}.xml ${tcmsHost}api/v1/dailyci?started_at=${timestamp}&branch=${branch}
+                curl -o ${branch}.xml ${tcmsHost}api/v1/dailyci?started_at=${id}&branch=${branch}
                 """
                 junit testResults: "${branch}.xml"
             }
