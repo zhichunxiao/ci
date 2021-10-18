@@ -77,6 +77,6 @@ node("${GO_BUILD_SLAVE}") {
                 runtasks(ref,repo,commitID,configs.tasks)
             }
         }
-        parallel jobs
+        parallel branchTasks
     }
 }
