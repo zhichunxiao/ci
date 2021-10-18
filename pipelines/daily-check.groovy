@@ -14,7 +14,7 @@ def get_sha(branch) {
 def configfile = "https://raw.githubusercontent.com/dianqihanwangzi/devops-config/daily-ci/${repo}/daily.yaml"
 
 
-def runtasks(branch,repo,commitID,tasks) {
+def runtasks(branch,repo,commitID,tasks,common) {
     jobs = [:]
     for (task in tasks) {
         taskType = task.taskType.toString()
@@ -74,7 +74,7 @@ node("${GO_BUILD_SLAVE}") {
             def commitID = get_sha(ref)
             branchTasks[ref] = {
                 common.cacheCode(REPO,commitID,ref,"")
-                runtasks(ref,repo,commitID,configs.tasks)
+                runtasks(ref,repo,commitID,configs.tasks,common)
             }
         }
         parallel branchTasks
