@@ -67,16 +67,12 @@ node("${GO_BUILD_SLAVE}") {
         def common = load "pipelines/common.groovy"
         configs = common.getConfig(configfile)
         refs  = configs.defaultRefs
-        branchTasks = [:]
         for (ref in refs) {
             def commitID = get_sha(ref)
-            branchTasks[ref] = {
-                stage("verify " + ref) {
-                    common.cacheCode(REPO,commitID,ref,"")
-                    runtasks(ref,repo,commitID,configs.tasks,common) 
-                }
-            }
+            stage("verify: " + ref) {
+                common.cacheCode(REPO,commitID,ref,"")
+                runtasks(ref,repo,commitID,configs.tasks,common) 
+            }            
         }
-        parallel branchTasks
     }
 }
