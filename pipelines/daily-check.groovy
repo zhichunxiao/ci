@@ -58,9 +58,7 @@ def runtasks(branch,repo,commitID,tasks,common) {
                 break
         }
     }
-    stage("verify") {
-        parallel jobs
-    }
+    parallel jobs
 }
 
 node("${GO_BUILD_SLAVE}") {
@@ -73,8 +71,10 @@ node("${GO_BUILD_SLAVE}") {
         for (ref in refs) {
             def commitID = get_sha(ref)
             branchTasks[ref] = {
-                common.cacheCode(REPO,commitID,ref,"")
-                runtasks(ref,repo,commitID,configs.tasks,common)
+                stage("verify " + ref) {
+                    common.cacheCode(REPO,commitID,ref,"")
+                    runtasks(ref,repo,commitID,configs.tasks,common) 
+                }
             }
         }
         parallel branchTasks
