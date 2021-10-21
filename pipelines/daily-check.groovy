@@ -67,12 +67,20 @@ node("${GO_BUILD_SLAVE}") {
         def common = load "pipelines/common.groovy"
         configs = common.getConfig(configfile)
         refs  = configs.defaultRefs
+        taskFailed = false
         for (ref in refs) {
             def commitID = get_sha(ref)
-            stage("verify: " + ref) {
-                common.cacheCode(REPO,commitID,ref,"")
-                runtasks(ref,repo,commitID,configs.tasks,common) 
-            }            
+            try {
+                stage("verify: " + ref) {
+                    common.cacheCode(REPO,commitID,ref,"")
+                    runtasks(ref,repo,commitID,configs.tasks,common) 
+                }     
+            } catch (Exception e) {
+                taskFailed = true
+            }           
+        }
+        if (taskFailed) {
+            throw new RuntimeException("task failed")
         }
     }
 }
