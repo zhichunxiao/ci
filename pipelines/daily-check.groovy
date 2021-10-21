@@ -1,3 +1,14 @@
+properties([
+        parameters([
+                string(
+                        defaultValue: 'pingcap/tidb',
+                        name: 'REPO',
+                        trim: true
+                )
+        ]),
+        pipelineTriggers([cron('H H * * *')])
+])
+
 repo = "" // chanage to origin repo
 org = ""
 repoInfo = REPO.split("/")
@@ -11,7 +22,7 @@ def get_sha(branch) {
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${branch} -s=${FILE_SERVER_URL}").trim()
 }
 
-def configfile = "https://raw.githubusercontent.com/dianqihanwangzi/devops-config/daily-ci/${repo}/daily.yaml"
+def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/master/${repo}/daily.yaml"
 
 
 def runtasks(branch,repo,commitID,tasks,common) {
