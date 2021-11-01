@@ -91,9 +91,17 @@ try {
                     }
 
                     stage("Download lint conf") {
-                        sh """
-                        curl -L -o .golangci.yml ${LINT_CONFIG_URL}
-                        """
+                        fileExist = sh(returnStatus: true, script: """
+                            if curl --output /dev/null --silent --head --fail ${LINT_CONFIG_URL}; then exit 0; else exit 1; fi
+                            """)
+                        if (fileExist == 0) {
+                            println "golangci lint config existed in devops-config"
+                            sh """
+                            curl -L -o .golangci.yml ${LINT_CONFIG_URL}
+                            """
+                        } else {
+                            println "use default golangci lint config"
+                        }
                     }
 
                     stage("Lint check") {
