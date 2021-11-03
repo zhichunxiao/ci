@@ -372,7 +372,11 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
-make build
+if [ ${REPO} == "tidb" ]; then
+    make build_dumpling
+else
+    make build
+fi;
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
 cp bin/* ${TARGET}/bin/   
