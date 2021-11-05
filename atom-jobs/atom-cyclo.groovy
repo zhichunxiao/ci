@@ -35,10 +35,10 @@ properties([
 
 
 def run_with_pod(Closure body) {
-    def label = "circle-complexity-atom-job" + UUID.randomUUID().toString()
+    def label = "circle-complexity-atom-job"
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
-    def pod_go_docker_image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
+    def pod_go_docker_image = "hub.pingcap.net/jenkins/centos7_golang-1.16"
     def jnlp_docker_image = "jenkins/inbound-agent:4.3-4"
     podTemplate(label: label,
             cloud: cloud,
@@ -46,7 +46,7 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
+                            name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '4000m', resourceRequestMemory: '8Gi',
                             resourceLimitCpu: '4000m', resourceLimitMemory: "8Gi",
@@ -95,6 +95,13 @@ try {
                     sh """
                     export PATH=${ws}/go/bin:\$PATH
                     ${CYCLO_CMD}
+                    """
+                }
+                
+                stage("Cyclo output") {
+                    sh """
+                    wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_cyclo/tiinsight-agent-cyclo.py
+                    python3 tiinsight-agent-cyclo.py ${REPO} "master" ${COMMIT_ID} repo_cyclo.log
                     """
                 }
             }
