@@ -26,6 +26,11 @@ properties([
                         name: 'CACHE_CODE_FILESERVER_URL',
                         trim: true
                 ),
+                string(
+                        defaultValue: '',
+                        name: 'REPORT_DIR',
+                        trim: true
+                ),
                 text(
                         defaultValue: 'golangci-lint run  --out-format=junit-xml  --timeout=10m  -v ./... > golangci-lint-report.xml',
                         name: 'LINT_CMD',
@@ -36,6 +41,10 @@ properties([
 
 
 LINT_CONFIG_URL = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/main/${REPO}/golangci-lint.yaml"
+
+if (REPORT_DIR == "") {
+    REPORT_DIR = "golangci-lint-report.xml"
+}
 
 
 def run_with_pod(Closure body) {
@@ -123,7 +132,7 @@ try {
             } finally {
                 junit(
                     allowEmptyResults: true,
-                    testResults: "${REPO}/golangci-lint-report.xml"
+                    testResults: "${REPO}/${REPORT_DIR}"
                 )
             }
         }
