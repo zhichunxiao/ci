@@ -119,7 +119,7 @@ def boolean needUpgradeGoVersion(String tag,String branch) {
         println "tag=${tag} need upgrade go version"
         return true
     }
-    if (branch.startsWith("master") || branch.startsWith("hz-poc")) {
+    if (branch.startsWith("master") || branch.startsWith("hz-poc") || branch.startsWith("main") || branch.startsWith("arm-dup") ) {
         println "targetBranch=${branch} need upgrade go version"
         return true
     }
