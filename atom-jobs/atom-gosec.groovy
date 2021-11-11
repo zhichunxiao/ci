@@ -96,6 +96,18 @@ try {
                         ${CMD}
                         """
                     }
+
+                    stage("Test Output") {
+                        dir("${ws}/${REPO}") {
+                            sh """
+                            wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-gosec/agent-gosec.py
+                            python3 agent-gosec.py results.xml
+                            """
+                            ENV_GOSEC_SUMMARY = sh(script: "cat gosec_summary.info", returnStdout: true).trim()
+                            println ENV_GOSEC_SUMMARY
+                            currentBuild.description = "${ENV_GOSEC_SUMMARY}"
+                        }
+                    }
                 }
                 currentBuild.result = "SUCCESS"
 

@@ -103,6 +103,13 @@ try {
                     wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_cyclo/tiinsight-agent-cyclo.py
                     python3 tiinsight-agent-cyclo.py ${REPO} "master" ${COMMIT_ID} repo_cyclo.log
                     """
+                    sh """
+                    wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-cyclo/agent-cyclo.py
+                    python3 agent-cyclo.py repo_cyclo.log
+                    """
+                    ENV_CYCLO_SUMMARY = sh(script: "cat cyclo_summary.info", returnStdout: true).trim()
+                    println ENV_CYCLO_SUMMARY
+                    currentBuild.description = "${ENV_CYCLO_SUMMARY}"
                 }
             }
             currentBuild.result = "SUCCESS"

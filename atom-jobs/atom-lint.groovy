@@ -59,7 +59,7 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
+                            name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '8000m', resourceRequestMemory: '8Gi',
                             resourceLimitCpu: '20000m', resourceLimitMemory: "20Gi",
@@ -126,6 +126,7 @@ try {
                     }
                 }
                 currentBuild.result = "SUCCESS"
+                currentBuild.description = ""
 
             } catch (err) {
                 throw err

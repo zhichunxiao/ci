@@ -58,7 +58,7 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
+                            name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '2000m', resourceRequestMemory: '2Gi',
                             command: '/bin/sh -c', args: 'cat',
@@ -104,6 +104,18 @@ run_with_pod {
                         go get github.com/AlekSi/gocov-xml
                     '''
                     sh TEST_CMD
+                }
+            }
+
+            stage("Test Output") {
+                dir("${ws}/${REPO}") {
+                    sh """
+                    wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
+                    python3 agent-ut.py ${UT_REPORT_DIR} ${COV_REPORT_DIR}
+                    """
+                    ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
+                    println ENV_TEST_SUMMARY
+                    currentBuild.description = "${ENV_TEST_SUMMARY}"
                 }
             }
         }  
