@@ -187,6 +187,7 @@ try {
             }
 
             currentBuild.result = "SUCCESS"
+            currentBuild.description = ""
         }
     }
 

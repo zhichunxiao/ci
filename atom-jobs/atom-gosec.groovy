@@ -96,6 +96,7 @@ try {
                         ${CMD}
                         """
                     }
+
                 }
                 currentBuild.result = "SUCCESS"
 
@@ -103,9 +104,18 @@ try {
                 throw err
             } finally {
                 sh """
-                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_gosec/tiinsight-agent-gosec.py
-                python3 tiinsight-agent-gosec.py ${REPO} "master" ${COMMIT_ID} ${REPO}/results.xml
+                    wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-gosec/agent-gosec.py
+                    python3 agent-gosec.py ${REPO}/results.xml
                 """
+                ENV_GOSEC_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
+                println ENV_GOSEC_SUMMARY
+                currentBuild.description = "${ENV_GOSEC_SUMMARY}"
+
+                sh """
+                    wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_gosec/tiinsight-agent-gosec.py
+                    python3 tiinsight-agent-gosec.py ${REPO} "master" ${COMMIT_ID} ${REPO}/results.xml
+                """
+
                 junit(
                         allowEmptyResults: true,
                         testResults: "${REPO}/results.xml"
