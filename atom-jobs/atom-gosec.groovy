@@ -107,7 +107,7 @@ try {
                     wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-gosec/agent-gosec.py
                     python3 agent-gosec.py ${REPO}/results.xml
                 """
-                ENV_GOSEC_SUMMARY = sh(script: "cat gosec_summary.info", returnStdout: true).trim()
+                ENV_GOSEC_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
                 println ENV_GOSEC_SUMMARY
                 currentBuild.description = "${ENV_GOSEC_SUMMARY}"
 
