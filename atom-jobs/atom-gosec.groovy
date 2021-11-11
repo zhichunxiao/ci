@@ -37,7 +37,7 @@ def run_with_pod(Closure body) {
     def label = "gosec-check-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
-    def pod_go_docker_image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
+    def pod_go_docker_image = "hub.pingcap.net/jenkins/centos7_golang-1.16"
     def jnlp_docker_image = "jenkins/inbound-agent:4.3-4"
     podTemplate(label: label,
             cloud: cloud,
@@ -45,7 +45,7 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
+                            name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '4000m', resourceRequestMemory: '8Gi',
                             resourceLimitCpu: '4000m', resourceLimitMemory: "8Gi",
@@ -102,6 +102,10 @@ try {
             } catch (err) {
                 throw err
             } finally {
+                sh """
+                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_gosec/tiinsight-agent-gosec.py
+                python3 tiinsight-agent-gosec.py ${REPO} "master" ${COMMIT_ID} ${REPO}/results.xml
+                """
                 junit(
                         allowEmptyResults: true,
                         testResults: "${REPO}/results.xml"
