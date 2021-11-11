@@ -107,21 +107,18 @@ run_with_pod {
                 }
             }
 
-            stage("Test Output") {
-                dir("${ws}/${REPO}") {
-                    sh """
-                    wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
-                    python3 agent-ut.py ${UT_REPORT_DIR} ${COV_REPORT_DIR}
-                    """
-                    ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
-                    println ENV_TEST_SUMMARY
-                    currentBuild.description = "${ENV_TEST_SUMMARY}"
-                }
-            }
         }  
         catch (err) {
             throw err
         } finally {
+            sh """
+                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
+                python3 agent-ut.py ${REPO}/${UT_REPORT_DIR} ${REPO}/${COV_REPORT_DIR} ${COVERAGE_RATE}
+            """
+            ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
+            println ENV_TEST_SUMMARY
+            currentBuild.description = "${ENV_TEST_SUMMARY}"
+
             junit testResults: "${REPO}/${UT_REPORT_DIR}"
             if (currentBuild.result == 'UNSTABLE') {
                 currentBuild.result = 'FAILURE'
