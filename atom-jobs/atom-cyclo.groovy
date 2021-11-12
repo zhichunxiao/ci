@@ -94,15 +94,15 @@ try {
             try {
                 def ws = pwd()
 
-            dir("${REPO}") {
-                stage("${TASK_NAME}") {
-                    println "${TASK_NAME}"
-                }
-                stage("Download code from fileserver") {
-                    sh """
-                    curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1
-                    """
-                }
+                dir("${REPO}") {
+                    stage("${TASK_NAME}") {
+                        println "${TASK_NAME}"
+                    }
+                    stage("Download code from fileserver") {
+                        sh """
+                        curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1
+                        """
+                    }
 
                     stage("Download gocyclo") {
                         sh """
