@@ -30,6 +30,21 @@ properties([
             name: 'OUTPUT_DIR',
             trim: true
         ),
+        string(
+            defaultValue: '',
+            name: 'TRIGGER_EVENT',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'BRANCH',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'TASK_NAME',
+            trim: true
+        ),
     ])
 ])
 
@@ -77,6 +92,9 @@ try {
     run_with_pod {
         container("golang") {
             def ws = pwd()
+            stage("${TASK_NAME}") {
+                println "${TASK_NAME}"
+            }
 
             stage("Download code from fileserver") {
                 sh '''

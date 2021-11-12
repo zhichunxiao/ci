@@ -43,6 +43,21 @@ gocov convert cover.out | gocov-xml > coverage.xml
             name: 'COVERAGE_RATE',
             trim: true,
         ),
+        string(
+            defaultValue: '',
+            name: 'TRIGGER_EVENT',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'BRANCH',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'TASK_NAME',
+            trim: true
+        ),
     ])
 ])
 
@@ -89,6 +104,10 @@ run_with_pod {
     container("golang") {
         try {
             def ws = pwd()
+
+            stage("${TASK_NAME}") {
+                println "${TASK_NAME}"
+            }
 
             stage("Download binary from fileserver") {
                 sh '''

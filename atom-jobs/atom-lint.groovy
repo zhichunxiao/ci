@@ -36,6 +36,21 @@ properties([
                         name: 'LINT_CMD',
                         trim: true
                 ),
+                string(
+                        defaultValue: '',
+                        name: 'TRIGGER_EVENT',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'BRANCH',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'TASK_NAME',
+                        trim: true
+                ),
         ])
 ])
 
@@ -93,6 +108,9 @@ try {
                 def ws = pwd()
 
                 dir("${REPO}") {
+                    stage("${TASK_NAME}") {
+                        println "${TASK_NAME}"
+                    }
                     stage("Download code from fileserver") {
                         sh """
                         curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1

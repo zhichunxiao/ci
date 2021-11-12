@@ -34,37 +34,37 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "build":
                 def buildConfig = common.parseBuildConfig(task)
                 jobs[taskName] = {
-                    common.buildBinary(buildConfig,repo,commitID)
+                    common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
                 }
                 break
             case "unit-test":
                 def unitTestConfig = common.parseUnitTestConfig(task)
                 jobs[taskName] = {
-                    common.unitTest(unitTestConfig,repo,commitID)
+                    common.unitTest(unitTestConfig,repo,commitID,branch,taskName,"daily")
                 }
                 break
             case "lint":
                 def lintConfig = common.parseLintConfig(task)
                 jobs[taskName] = {
-                    common.codeLint(lintConfig,repo,commitID)
+                    common.codeLint(lintConfig,repo,commitID,branch,taskName,"daily")
                 }
                 break
             case "cyclo": 
                 def cycloConfig = common.parseCycloConfig(task)
                 jobs[taskName] = {
-                    common.codeCyclo(cycloConfig,repo,commitID)
+                    common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
                 }
                 break
             case "gosec":
                 def gosecConfig = common.parseGosecConfig(task)
                 jobs[taskName] = {
-                    common.codeGosec(gosecConfig,repo,commitID)
+                    common.codeGosec(gosecConfig,repo,commitID,branch,taskName,"daily")
                 }
                 break
             case "common":
                 def commonConfig = common.parseCommonConfig(task)
                 jobs[taskName] = {
-                    common.codeCommon(commonConfig,repo,commitID,branch)
+                    common.codeCommon(commonConfig,repo,commitID,branch,taskName,"daily")
                 }
                 break
         }
