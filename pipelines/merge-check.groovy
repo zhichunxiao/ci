@@ -30,37 +30,37 @@ try {
                     case "build":
                         def buildConfig = common.parseBuildConfig(task)
                         jobs[taskName] = {
-                            common.buildBinary(buildConfig,repo,COMMIT_ID)
+                            common.buildBinary(buildConfig,repo,COMMIT_ID,BRANCH,taskName,"merge")
                         }
                         break
                     case "unit-test":
                         def unitTestConfig = common.parseUnitTestConfig(task)
                         jobs[taskName] = {
-                            common.unitTest(unitTestConfig,repo,COMMIT_ID)
+                            common.unitTest(unitTestConfig,repo,COMMIT_ID,BRANCH,taskName,"merge")
                         }
                         break
                     case "lint":
                         def lintConfig = common.parseLintConfig(task)
                         jobs[taskName] = {
-                            common.codeLint(lintConfig,repo,COMMIT_ID)
+                            common.codeLint(lintConfig,repo,COMMIT_ID,BRANCH,taskName,"merge")
                         }
                         break
                     case "cyclo": 
                         def cycloConfig = common.parseCycloConfig(task)
                         jobs[taskName] = {
-                            common.codeCyclo(cycloConfig,repo,COMMIT_ID)
+                            common.codeCyclo(cycloConfig,repo,COMMIT_ID,BRANCH,taskName,"merge")
                         }
                         break
                     case "gosec":
                         def gosecConfig = common.parseGosecConfig(task)
                         jobs[taskName] = {
-                            common.codeGosec(gosecConfig,repo,COMMIT_ID)
+                            common.codeGosec(gosecConfig,repo,COMMIT_ID,BRANCH,taskName,"merge")
                         }
                         break
                     case "common":
                         def commonConfig = common.parseCommonConfig(task)
                         jobs[taskName] = {
-                            common.codeCommon(commonConfig,repo,COMMIT_ID,BRANCH)
+                            common.codeCommon(commonConfig,repo,COMMIT_ID,BRANCH,taskName,"merge")
                         }
                         break
                 }

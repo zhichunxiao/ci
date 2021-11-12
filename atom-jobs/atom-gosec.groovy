@@ -30,6 +30,21 @@ properties([
                         defaultValue: 'gosec -fmt=junit-xml -out=results.xml -stdout -verbose=text -exclude=G103,G104,G204,G307,G401,G404,G501,G505,G601 ./...  || exit 0',
                         name: 'CMD'
                 ),
+                string(
+                        defaultValue: '',
+                        name: 'TRIGGER_EVENT',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'BRANCH',
+                        trim: true
+                ),
+                string(
+                        defaultValue: '',
+                        name: 'TASK_NAME',
+                        trim: true
+                ),
         ])
 ])
 
@@ -79,6 +94,9 @@ try {
                 def ws = pwd()
 
                 dir("${REPO}") {
+                    stage("${TASK_NAME}") {
+                        println "${TASK_NAME}"
+                    }
                     stage("Download code from fileserver") {
                         sh """
                         curl ${CACHE_CODE_FILESERVER_URL} | tar xz --strip-components=1

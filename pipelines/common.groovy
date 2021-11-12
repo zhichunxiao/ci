@@ -139,7 +139,7 @@ def cacheCode(repo,commitID,branch,prID) {
     triggerTask("cache-code",cacheCodeParams)
 }
 
-def buildBinary(buildConfig,repo,commitID) {
+def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
     buildParams = [
         string(name: 'REPO', value: repo),
@@ -148,11 +148,14 @@ def buildBinary(buildConfig,repo,commitID) {
         text(name: 'BUILD_CMD', value: buildConfig.shellScript),
         string(name: 'BUILD_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
         string(name: 'OUTPUT_DIR', value: "bin"),
+        string(name: 'BRANCH', value: branch),
+        string(name: 'TASK_NAME', value: taskName),
+        string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-build",buildParams)
 }
 
-def codeLint(lintConfig,repo, commitID) {
+def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
     lintParams = [
         string(name: 'REPO', value: repo),
@@ -160,11 +163,14 @@ def codeLint(lintConfig,repo, commitID) {
         string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
         text(name: 'LINT_CMD', value: lintConfig.shellScript),
         string(name: 'REPORT_DIR', value: lintConfig.reportDir),
+        string(name: 'BRANCH', value: branch),
+        string(name: 'TASK_NAME', value: taskName),
+        string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-lint",lintParams)
 }
 
-def unitTest(unitTestConfig,repo,commitID) {
+def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
     utParams = [
         string(name: 'REPO', value: repo),
@@ -175,11 +181,14 @@ def unitTest(unitTestConfig,repo,commitID) {
         string(name: 'COV_REPORT_DIR', value: unitTestConfig.covReportDir),
         string(name: 'COVERAGE_RATE', value: unitTestConfig.coverageRate),
         string(name: 'TEST_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
+        string(name: 'BRANCH', value: branch),
+        string(name: 'TASK_NAME', value: taskName),
+        string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-ut",utParams)
 }
 
-def codeGosec(gosecConfig,repo,commitID) {
+def codeGosec(gosecConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
     gosecParams = [
             string(name: 'REPO', value: repo),
@@ -187,22 +196,28 @@ def codeGosec(gosecConfig,repo,commitID) {
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
             text(name: 'CMD', value: gosecConfig.shellScript),
             string(name: 'REPORT_DIR', value: gosecConfig.reportDir),
+            string(name: 'BRANCH', value: branch),
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-gosec",gosecParams)
 }
 
-def codeCyclo(cycloConfig,repo,commitID) {
+def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
     cycloParams = [
             string(name: 'REPO', value: repo),
             string(name: 'COMMIT_ID', value: commitID),
             string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
             text(name: 'CYCLO_CMD', value: cycloConfig.shellScript),
+            string(name: 'BRANCH', value: branch),
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-cyclo",cycloParams)
 }
 
-def codeCommon(commonConfig,repo,commitID,branch) {
+def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
     def image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
     if (commonConfig.env.image != null && commonConfig.env.image != "") {
@@ -223,6 +238,9 @@ def codeCommon(commonConfig,repo,commitID,branch) {
             string(name: 'TARGET_BRANCH', value: branch),
             string(name: 'SECRET_VARS', value: secretVarsString),
             text(name: 'COMMON_CMD', value: script),
+            string(name: 'BRANCH', value: branch),
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-common",commonParams)
 }
