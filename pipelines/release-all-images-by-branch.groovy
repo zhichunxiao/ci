@@ -21,6 +21,7 @@ properties([
                 H H(0-23)/4 * * * % GIT_BRANCH=release-5.0
                 H H(0-23)/4 * * * % GIT_BRANCH=release-5.1
                 H H(0-23)/4 * * * % GIT_BRANCH=release-5.2
+                H H(0-23)/4 * * * % GIT_BRANCH=release-5.3
                 H H(0-23)/4 * * * % GIT_BRANCH=master
             ''')
         ])
