@@ -91,7 +91,8 @@ def run_with_pod(Closure body) {
 try {
     run_with_pod {
         container("golang") {
-            def ws = pwd()
+            try {
+                def ws = pwd()
 
             dir("${REPO}") {
                 stage("${TASK_NAME}") {
@@ -103,28 +104,38 @@ try {
                     """
                 }
 
-                stage("Download gocyclo") {
-                    sh """
-                    go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-                    """
-                }
+                    stage("Download gocyclo") {
+                        sh """
+                        go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+                        """
+                    }
 
-                stage("Cyclo check") {
-                    sh """
-                    export PATH=${ws}/go/bin:\$PATH
-                    ${CYCLO_CMD}
-                    """
+                    stage("Cyclo check") {
+                        sh """
+                        export PATH=${ws}/go/bin:\$PATH
+                        ${CYCLO_CMD}
+                        """
+                    }
+                    
                 }
-                
-                stage("Cyclo output") {
-                    sh """
-                    wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_cyclo/tiinsight-agent-cyclo.py
-                    python3 tiinsight-agent-cyclo.py ${REPO} "master" ${COMMIT_ID} repo_cyclo.log
-                    """
-                }
+                currentBuild.result = "SUCCESS"
+            } catch (e) {
+                println "error: ${e}"
+                throw e
+            } finally {
+                println "finally"
+                sh """
+                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_cyclo/tiinsight-agent-cyclo.py
+                python3 tiinsight-agent-cyclo.py ${REPO} "master" ${COMMIT_ID} ${REPO}/repo_cyclo.log
+                """
+                sh """
+                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-cyclo/agent-cyclo.py
+                python3 agent-cyclo.py ${REPO}/repo_cyclo.log
+                """
+                ENV_CYCLO_SUMMARY = sh(script: "cat cyclo_summary.info", returnStdout: true).trim()
+                println ENV_CYCLO_SUMMARY
+                currentBuild.description = "${ENV_CYCLO_SUMMARY}"
             }
-            currentBuild.result = "SUCCESS"
-
         }
     }
 }

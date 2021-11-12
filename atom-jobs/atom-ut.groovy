@@ -73,7 +73,7 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
+                            name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '2000m', resourceRequestMemory: '2Gi',
                             command: '/bin/sh -c', args: 'cat',
@@ -125,10 +125,19 @@ run_with_pod {
                     sh TEST_CMD
                 }
             }
+
         }  
         catch (err) {
             throw err
         } finally {
+            sh """
+                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
+                python3 agent-ut.py ${REPO}/${UT_REPORT_DIR} ${REPO}/${COV_REPORT_DIR} ${COVERAGE_RATE}
+            """
+            ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
+            println ENV_TEST_SUMMARY
+            currentBuild.description = "${ENV_TEST_SUMMARY}"
+
             junit testResults: "${REPO}/${UT_REPORT_DIR}"
             if (currentBuild.result == 'UNSTABLE') {
                 currentBuild.result = 'FAILURE'

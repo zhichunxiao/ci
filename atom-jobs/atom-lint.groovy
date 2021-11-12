@@ -26,6 +26,11 @@ properties([
                         name: 'CACHE_CODE_FILESERVER_URL',
                         trim: true
                 ),
+                string(
+                        defaultValue: '',
+                        name: 'REPORT_DIR',
+                        trim: true
+                ),
                 text(
                         defaultValue: 'golangci-lint run  --out-format=junit-xml  --timeout=10m  -v ./... > golangci-lint-report.xml',
                         name: 'LINT_CMD',
@@ -52,6 +57,10 @@ properties([
 
 LINT_CONFIG_URL = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/main/${REPO}/golangci-lint.yaml"
 
+if (REPORT_DIR == "") {
+    REPORT_DIR = "golangci-lint-report.xml"
+}
+
 
 def run_with_pod(Closure body) {
     def label = "lint-check-atom-job" + UUID.randomUUID().toString()
@@ -65,7 +74,7 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
+                            name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '8000m', resourceRequestMemory: '8Gi',
                             resourceLimitCpu: '20000m', resourceLimitMemory: "20Gi",
@@ -135,13 +144,14 @@ try {
                     }
                 }
                 currentBuild.result = "SUCCESS"
+                currentBuild.description = ""
 
             } catch (err) {
                 throw err
             } finally {
                 junit(
                     allowEmptyResults: true,
-                    testResults: "${REPO}/golangci-lint-report.xml"
+                    testResults: "${REPO}/${REPORT_DIR}"
                 )
             }
         }

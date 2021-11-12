@@ -119,7 +119,7 @@ def boolean needUpgradeGoVersion(String tag,String branch) {
         println "tag=${tag} need upgrade go version"
         return true
     }
-    if (branch.startsWith("master") || branch.startsWith("hz-poc")) {
+    if (branch.startsWith("master") || branch.startsWith("hz-poc") || branch.startsWith("main") || branch.startsWith("arm-dup") ) {
         println "targetBranch=${branch} need upgrade go version"
         return true
     }
@@ -380,6 +380,22 @@ fi;
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
 cp bin/* ${TARGET}/bin/   
+"""
+
+buildsh["ng-monitoring"] = """
+if [ ${RELEASE_TAG}x != ''x ];then
+    for a in \$(git tag --contains ${GIT_HASH}); do echo \$a && git tag -d \$a;done
+    git tag -f ${RELEASE_TAG} ${GIT_HASH}
+    git branch -D refs/tags/${RELEASE_TAG} || true
+    git checkout -b refs/tags/${RELEASE_TAG}
+fi;
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
+    export PATH=${binPath}
+fi;
+make
+rm -rf ${TARGET}
+mkdir -p ${TARGET}/bin    
+cp bin/* ${TARGET}/bin/  
 """
 
 buildsh["tidb-enterprise-tools"] = """
