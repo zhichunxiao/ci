@@ -28,6 +28,10 @@ properties([
                 booleanParam(
                         defaultValue: true,
                         name: 'FORCE_REBUILD'
+                ),
+                booleanParam(
+                        defaultValue: true,
+                        name: 'NEED_DEBUG_IMAGE'
                 )
         ])
 ])
@@ -86,15 +90,15 @@ def release_one(repo,failpoint) {
             parameters: paramsBuild
 
     def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
-    def image = "hub-new.pingcap.net/qa/${repo}:${IMAGE_TAG},pingcap/${repo}:${IMAGE_TAG}"
+    def image = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG},pingcap/${repo}:${IMAGE_TAG}"
     if (repo == "tics") {
-        image = image + ",hub-new.pingcap.net/qa/tiflash:${IMAGE_TAG},pingcap/tiflash:${IMAGE_TAG}"
+        image = image + ",hub.pingcap.net/qa/tiflash:${IMAGE_TAG},pingcap/tiflash:${IMAGE_TAG}"
     }
     if (repo == "monitoring") {
-        image = "hub-new.pingcap.net/qa/tidb-monitor-initializer:${IMAGE_TAG},pingcap/tidb-monitor-initializer:${IMAGE_TAG}"
+        image = "hub.pingcap.net/qa/tidb-monitor-initializer:${IMAGE_TAG},pingcap/tidb-monitor-initializer:${IMAGE_TAG}"
     }
     if (failpoint) {
-        image = "hub-new.pingcap.net/qa/${repo}:${IMAGE_TAG}-failpoint"
+        image = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG}-failpoint"
     }
     def paramsDocker = [
         string(name: "ARCH", value: "amd64"),
@@ -110,9 +114,34 @@ def release_one(repo,failpoint) {
             wait: true,
             parameters: paramsDocker
 
+
+    if (NEED_DEBUG_IMAGE) {
+        def dockerfileForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/${repo}"
+        def imageForDebug = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG}-debug"
+        if (failpoint) {
+            imageForDebug = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG}-failpoint-debug"
+        }
+        def paramsDockerForDebug = [
+            string(name: "ARCH", value: "amd64"),
+            string(name: "OS", value: "linux"),
+            string(name: "INPUT_BINARYS", value: binary),
+            string(name: "REPO", value: repo),
+            string(name: "PRODUCT", value: repo),
+            string(name: "RELEASE_TAG", value: RELEASE_TAG),
+            string(name: "DOCKERFILE", value: dockerfileForDebug),
+            string(name: "RELEASE_DOCKER_IMAGES", value: imageForDebug),
+        ]
+        if (repo in ["dumpling","ticdc","tidb-binlog","tidb","tikv","pd"]) {
+            build job: "docker-common",
+                    wait: true,
+                    parameters: paramsDockerForDebug
+        }
+    }
+    
+
     if (repo == "br") {
         def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
-        def imageLightling = "hub-new.pingcap.net/qa/tidb-lightning:${IMAGE_TAG},pingcap/tidb-lightning:${IMAGE_TAG}"
+        def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${IMAGE_TAG},pingcap/tidb-lightning:${IMAGE_TAG}"
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
@@ -127,6 +156,26 @@ def release_one(repo,failpoint) {
                 wait: true,
                 parameters: paramsDockerLightning
         }
+
+        if (NEED_DEBUG_IMAGE) {
+            def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
+            def imageLightlingForDebug = "hub.pingcap.net/qa/tidb-lightning:${IMAGE_TAG}-debug"
+            def paramsDockerLightningForDebug = [
+                string(name: "ARCH", value: "amd64"),
+                string(name: "OS", value: "linux"),
+                string(name: "INPUT_BINARYS", value: binary),
+                string(name: "REPO", value: "lightning"),
+                string(name: "PRODUCT", value: "lightning"),
+                string(name: "RELEASE_TAG", value: RELEASE_TAG),
+                string(name: "DOCKERFILE", value: dockerfileLightningForDebug),
+                string(name: "RELEASE_DOCKER_IMAGES", value: imageLightlingForDebug),
+            ]
+            build job: "docker-common",
+                    wait: true,
+                    parameters: paramsDockerLightningForDebug
+        }
+
+        
 }
 
 stage ("release") {
