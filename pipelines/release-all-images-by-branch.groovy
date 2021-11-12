@@ -136,8 +136,7 @@ def release_one(repo,failpoint) {
         build job: "docker-common",
                 wait: true,
                 parameters: paramsDockerLightning
-        }
-
+                
         def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
         def imageLightningForDebug = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-debug"
         def paramsDockerLightningForDebug = [
@@ -153,6 +152,10 @@ def release_one(repo,failpoint) {
         build job: "docker-common",
                 wait: true,
                 parameters: paramsDockerLightningForDebug
+
+    }
+
+        
 }
 
 stage ("release") {
