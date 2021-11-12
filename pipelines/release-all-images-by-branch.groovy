@@ -76,9 +76,9 @@ def release_one(repo,failpoint) {
             parameters: paramsBuild
 
     def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
-    def image = "hub-new.pingcap.net/qa/${repo}:${GIT_BRANCH}"
+    def image = "hub.pingcap.net/qa/${repo}:${GIT_BRANCH}"
     if (repo == "tics") {
-        image = image + ",hub-new.pingcap.net/qa/tiflash:${GIT_BRANCH}"
+        image = image + ",hub.pingcap.net/qa/tiflash:${GIT_BRANCH}"
     }
     if (failpoint) {
         image = "${image}-failpoint"
@@ -99,9 +99,9 @@ def release_one(repo,failpoint) {
 
 
     def dockerfileForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/${repo}"
-    def imageForDebug = "hub-new.pingcap.net/qa/${repo}:${GIT_BRANCH}-debug"
+    def imageForDebug = "hub.pingcap.net/qa/${repo}:${GIT_BRANCH}-debug"
     if (repo == "tics") {
-        imageForDebug = imageForDebug + ",hub-new.pingcap.net/qa/tiflash:${GIT_BRANCH}-debug"
+        imageForDebug = imageForDebug + ",hub.pingcap.net/qa/tiflash:${GIT_BRANCH}-debug"
     }
     if (failpoint) {
         imageForDebug = "${imageForDebug}-failpoint"
@@ -123,7 +123,7 @@ def release_one(repo,failpoint) {
 
     if (repo == "br") {
         def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
-        def imageLightling = "hub-new.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}"
+        def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}"
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
@@ -140,7 +140,7 @@ def release_one(repo,failpoint) {
         }
 
         def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
-        def imageLightningForDebug = "hub-new.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-debug"
+        def imageLightningForDebug = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-debug"
         def paramsDockerLightningForDebug = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
