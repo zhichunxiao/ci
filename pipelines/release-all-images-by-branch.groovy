@@ -100,11 +100,8 @@ def release_one(repo,failpoint) {
 
     def dockerfileForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/${repo}"
     def imageForDebug = "hub.pingcap.net/qa/${repo}:${GIT_BRANCH}-debug"
-    if (repo == "tics") {
-        imageForDebug = imageForDebug + ",hub.pingcap.net/qa/tiflash:${GIT_BRANCH}-debug"
-    }
     if (failpoint) {
-        imageForDebug = "${imageForDebug}-failpoint"
+        imageForDebug = "hub.pingcap.net/qa/${repo}:${GIT_BRANCH}-failpoint-debug"
     }
     def paramsDockerForDebug = [
         string(name: "ARCH", value: "amd64"),
@@ -116,9 +113,11 @@ def release_one(repo,failpoint) {
         string(name: "DOCKERFILE", value: dockerfileForDebug),
         string(name: "RELEASE_DOCKER_IMAGES", value: imageForDebug),
     ]
-    build job: "docker-common",
+    if (repo != "tics") {
+        build job: "docker-common",
             wait: true,
             parameters: paramsDockerForDebug
+    }
 
 
     if (repo == "br") {
