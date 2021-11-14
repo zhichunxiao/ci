@@ -117,6 +117,7 @@ def parseCommonConfig(config) {
 }
 
 def triggerTask(atomJobName,taskName,params) {
+    println("${taskName}::: ${atomJobName}")
     result = build(job: atomJobName, parameters: params, wait: true,propagate: false)
     if (result.getResult() != "SUCCESS" && atomJobName in ["atom-ut", "atom-gosec"]) {
         println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/tests")
