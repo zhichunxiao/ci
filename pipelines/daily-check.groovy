@@ -33,7 +33,8 @@ def get_sha(branch) {
 def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/master/${repo}/daily.yaml"
 
 // >> TODO remote debug code here
-configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci.yaml"
+// configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci.yaml"
+configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci-deubug.yaml"
 
 
 def runtasks(branch,repo,commitID,tasks,common) {
