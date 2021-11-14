@@ -17,12 +17,23 @@ if (repoInfo.length == 2) {
     repo = repoInfo[1]
 }
 
+// >> TODO remote debug code here
+REPO = 'pingcap/tidb'
+repo = "tidb"
+org = "pingcap"
+branch = "master"
+// << TODO remote debug code here
+
+
 def get_sha(branch) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${branch} -s=${FILE_SERVER_URL}").trim()
 }
 
 def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/master/${repo}/daily.yaml"
+
+// >> TODO remote debug code here
+configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci.yaml"
 
 
 def runtasks(branch,repo,commitID,tasks,common) {
@@ -87,7 +98,7 @@ def runtasks(branch,repo,commitID,tasks,common) {
         println task_result_array
         for (result_map in task_result_array) {
             if (result_map.taskResult != "SUCCESS") {
-                taskFailed = true
+                println "${result_map.name} task failed"
             }
             if (result_map.taskSummary != null && result_map.taskSummary != "") {
                 println("${result_map.name} ${result_map.taskResult}: ${result_map.taskSummary}")
