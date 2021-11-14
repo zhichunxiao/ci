@@ -111,8 +111,13 @@ def runtasks(branch,repo,commitID,tasks,common) {
 
 node("${GO_BUILD_SLAVE}") {
     container("golang") {
-        checkout scm
-        def common = load "pipelines/common.groovy"
+        // checkout scm
+        // def common = load "pipelines/common.groovy"
+        // >> TODO remote debug code here
+        sh "wget https://raw.githubusercontent.com/purelind/jenkins-templates/purelind/task-summary/pipelines/common.groovy"
+        def common = load "common.groovy"
+        // << TODO remote debug code here
+
         configs = common.getConfig(configfile)
         refs  = configs.defaultRefs
         taskFailed = false
