@@ -171,7 +171,7 @@ def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
     ]
     // triggerTask("atom-build",buildParams)
     // TODO debug pipeline
-    triggerTask("debug-pipeline2",buildParams)
+    triggerTask("debug-pipeline2",taskName,buildParams)
 }
 
 def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
