@@ -27,6 +27,7 @@ def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/mas
 
 def runtasks(branch,repo,commitID,tasks,common) {
     jobs = [:]
+    def task_result_array = []
     for (task in tasks) {
         taskType = task.taskType.toString()
         taskName =task.name.toString()
@@ -34,7 +35,11 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "build":
                 def buildConfig = common.parseBuildConfig(task)
                 jobs[taskName] = {
-                    common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
+                    def result_map = common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << result_map
+                    if (result_map.taskResult != "SUCCESS") {
+                        throw new Exception("task failed")
+                    }
                 }
                 break
             case "unit-test":
@@ -52,7 +57,11 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "cyclo": 
                 def cycloConfig = common.parseCycloConfig(task)
                 jobs[taskName] = {
-                    common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
+                    def result_map = common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << result_map
+                    if (result_map.taskResult != "SUCCESS") {
+                        throw new Exception("task failed")
+                    }
                 }
                 break
             case "gosec":
@@ -69,7 +78,24 @@ def runtasks(branch,repo,commitID,tasks,common) {
                 break
         }
     }
-    parallel jobs
+    
+    try {
+        parallel jobs
+    } catch (e) {
+        throw new Exception("task failed")
+    } finally {
+        println task_result_array
+        for (result_map in task_result_array) {
+            if (result_map.taskResult != "SUCCESS") {
+                taskFailed = true
+            }
+            if (result_map.taskSummary != null && result_map.taskSummary != "") {
+                println("${result_map.name} ${result_map.taskResult}: ${result_map.taskSummary}")
+                println("${result_map.name} #${result_map.buildNumber}: ${result_map.url}")
+            }
+        }
+    }
+    
 }
 
 node("${GO_BUILD_SLAVE}") {

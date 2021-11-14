@@ -116,12 +116,30 @@ def parseCommonConfig(config) {
     return commonConfig
 }
 
-def triggerTask(taskName,params) {
-    result = build(job: taskName, parameters: params, wait: true,propagate: false)
-    echo "log url: " + result.getAbsoluteUrl() + "console"
-    if (result.getResult() != "SUCCESS") {
-        throw new Exception("task failed")
+def triggerTask(atomJobName,taskName,params) {
+    result = build(job: atomJobName, parameters: params, wait: true,propagate: false)
+    if (result.getResult() != "SUCCESS" && taskType in ["unitTest", "gosec"]) {
+        println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/tests")
+    } else {
+        println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/pipeline")
     }
+    if (result.getDescription() != null && result.getDescription() != "") {
+        println("${taskName} ${result.getResult()}: ${result.getDescription()}")
+    } else {
+        println("${taskName} ${result.getResult()}")
+    }
+    
+    def resp_map = {}
+    resp_map["atom-job"] = atomJobName
+    resp_map["name"] = taskName
+    resp_map["taskType"] = taskType
+    resp_map["taskResult"] = result.getResult()
+    resp_map["taskSummary"] = result.getDescription()
+    resp_map["resultObject"] = result
+    resp_map["buildNumber"] = result.getNumber().toString()
+    resp_map["url"] = "${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}"
+
+    return resp_map
 }
 
 
@@ -136,7 +154,7 @@ def cacheCode(repo,commitID,branch,prID) {
     if (prID != "" && prID != null ) {
         cacheCodeParams.push(string(name: 'PULL_ID', value: prID))
     }
-    triggerTask("cache-code",cacheCodeParams)
+    triggerTask("cache-code","cache-code",cacheCodeParams)
 }
 
 def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
@@ -152,7 +170,9 @@ def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'TASK_NAME', value: taskName),
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    triggerTask("atom-build",buildParams)
+    // triggerTask("atom-build",buildParams)
+    // TODO debug pipeline
+    triggerTask("debug-pipeline2",buildParams)
 }
 
 def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
@@ -185,7 +205,7 @@ def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'TASK_NAME', value: taskName),
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    triggerTask("atom-ut",utParams)
+    triggerTask("atom-ut","taskName",utParams)
 }
 
 def codeGosec(gosecConfig,repo,commitID,branch,taskName,triggerEvent) {
@@ -214,7 +234,10 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    triggerTask("atom-cyclo",cycloParams)
+    // triggerTask("atom-cyclo","taskName",cycloParams)
+    // TODO debug pipeline
+    triggerTask("debug-pipeline1","taskName",cycloParams)
+
 }
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
