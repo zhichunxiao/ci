@@ -235,7 +235,7 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
     ]
     // triggerTask("atom-cyclo","taskName",cycloParams)
     // TODO debug pipeline
-    triggerTask("debug-pipeline1","taskName",cycloParams)
+    triggerTask("debug-pipeline1",taskName,cycloParams)
 
 }
 

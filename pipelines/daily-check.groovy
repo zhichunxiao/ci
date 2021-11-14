@@ -96,18 +96,19 @@ def runtasks(branch,repo,commitID,tasks,common) {
     } catch (e) {
         throw new Exception("task failed")
     } finally {
-        println task_result_array
-        for (result_map in task_result_array) {
-            if (result_map.taskResult != "SUCCESS") {
-                println "${result_map.name} task failed"
-            }
-            if (result_map.taskSummary != null && result_map.taskSummary != "") {
-                println("${result_map.name} ${result_map.taskResult}: ${result_map.taskSummary}")
-                println("${result_map.name} #${result_map.buildNumber}: ${result_map.url}")
+        stage("summary") {
+            println task_result_array
+            for (result_map in task_result_array) {
+                if (result_map.taskResult != "SUCCESS") {
+                    println "${result_map.name} task failed"
+                }
+                if (result_map.taskSummary != null && result_map.taskSummary != "") {
+                    println("${result_map.name} ${result_map.taskResult}: ${result_map.taskSummary}")
+                    println("${result_map.name} #${result_map.buildNumber}: ${result_map.url}")
+                }
             }
         }
     }
-    
 }
 
 node("${GO_BUILD_SLAVE}") {
