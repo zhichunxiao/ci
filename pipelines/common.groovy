@@ -118,7 +118,7 @@ def parseCommonConfig(config) {
 
 def triggerTask(atomJobName,taskName,params) {
     result = build(job: atomJobName, parameters: params, wait: true,propagate: false)
-    if (result.getResult() != "SUCCESS" && taskType in ["unitTest", "gosec"]) {
+    if (result.getResult() != "SUCCESS" && atomJobName in ["atom-ut", "atom-gosec"]) {
         println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/tests")
     } else {
         println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/pipeline")
@@ -130,9 +130,8 @@ def triggerTask(atomJobName,taskName,params) {
     }
     
     def resp_map = {}
-    resp_map["atom-job"] = atomJobName
+    resp_map["atomJob"] = atomJobName
     resp_map["name"] = taskName
-    resp_map["taskType"] = taskType
     resp_map["taskResult"] = result.getResult()
     resp_map["taskSummary"] = result.getDescription()
     resp_map["resultObject"] = result
