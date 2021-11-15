@@ -28,8 +28,8 @@ def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/mas
 def runtasks(branch,repo,commitID,tasks,common) {
     jobs = [:]
     for (task in tasks) {
-        taskType = task.taskType.toString()
-        taskName =task.name.toString()
+        def taskType = task.taskType.toString()
+        def taskName =task.name.toString()
         switch(taskType) {
             case "build":
                 def buildConfig = common.parseBuildConfig(task)
