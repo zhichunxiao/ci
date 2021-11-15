@@ -47,7 +47,8 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "build":
                 def buildConfig = common.parseBuildConfig(task)
                 jobs[taskName] = {
-                    def result_map = common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
+                    def result_map = [:]
+                    result_map = common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
                     task_result_array << result_map
                     // if (result_map.taskResult != "SUCCESS") {
                     //     throw new Exception("task failed")
@@ -69,7 +70,8 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "cyclo": 
                 def cycloConfig = common.parseCycloConfig(task)
                 jobs[taskName] = {
-                    def result_map = common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
+                    def result_map = [:]
+                    result_map = common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
                     task_result_array << result_map
                     // if (result_map.taskResult != "SUCCESS") {
                     //     throw new Exception("task failed")
@@ -131,6 +133,7 @@ node("${GO_BUILD_SLAVE}") {
                 stage("verify: " + ref) {
                     common.cacheCode(REPO,commitID,ref,"")
                     def task_result_array = runtasks(ref,repo,commitID,configs.tasks,common) 
+                    
                     for (result_map in task_result_array) {
                         println result_map.name
                     }
