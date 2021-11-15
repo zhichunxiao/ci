@@ -65,7 +65,7 @@ def run_with_pod(Closure body) {
     def label = "atom-ut-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
-    def pod_go_docker_image = 'hub-new.pingcap.net/jenkins/centos7_golang-1.16'
+    def pod_go_docker_image = 'hub.pingcap.net/jenkins/centos7_golang-1.16'
     def jnlp_docker_image = "jenkins/inbound-agent:4.3-4"
     podTemplate(label: label,
             cloud: cloud,
@@ -133,6 +133,9 @@ run_with_pod {
             sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
                 python3 agent-ut.py ${REPO}/${UT_REPORT_DIR} ${REPO}/${COV_REPORT_DIR} ${COVERAGE_RATE}
+                
+                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_ut/tiinsight-agent-ut.py
+                python3 tiinsight-agent-ut.py ${REPO} ${BRANCH} ${COMMIT_ID} ${REPO}/${COV_REPORT_DIR}
             """
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
