@@ -155,7 +155,7 @@ def cacheCode(repo,commitID,branch,prID) {
     if (prID != "" && prID != null ) {
         cacheCodeParams.push(string(name: 'PULL_ID', value: prID))
     }
-    triggerTask("cache-code","cache-code",cacheCodeParams)
+    triggerTask("cache-code",cacheCodeParams)
 }
 
 def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
@@ -173,7 +173,7 @@ def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
     ]
     // triggerTask("atom-build",buildParams)
     // TODO debug pipeline
-    triggerTask("debug-pipeline2",taskName,buildParams)
+    triggerTask("debug-pipeline2",buildParams)
 }
 
 def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
@@ -206,7 +206,7 @@ def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'TASK_NAME', value: taskName),
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    triggerTask("atom-ut","taskName",utParams)
+    triggerTask("atom-ut",utParams)
 }
 
 def codeGosec(gosecConfig,repo,commitID,branch,taskName,triggerEvent) {
@@ -237,7 +237,7 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
     ]
     // triggerTask("atom-cyclo","taskName",cycloParams)
     // TODO debug pipeline
-    triggerTask("debug-pipeline1",taskName,cycloParams)
+    triggerTask("debug-pipeline1",cycloParams)
 
 }
 
