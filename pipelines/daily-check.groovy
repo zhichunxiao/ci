@@ -41,17 +41,17 @@ def runtasks(branch,repo,commitID,tasks,common) {
     jobs = [:]
     def task_result_array = []
     for (task in tasks) {
-        taskType = task.taskType.toString()
-        taskName =task.name.toString()
+        def taskType = task.taskType.toString()
+        def taskName =task.name.toString()
         switch(taskType) {
             case "build":
                 def buildConfig = common.parseBuildConfig(task)
                 jobs[taskName] = {
                     def result_map = common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
                     task_result_array << result_map
-                    if (result_map.taskResult != "SUCCESS") {
-                        throw new Exception("task failed")
-                    }
+                    // if (result_map.taskResult != "SUCCESS") {
+                    //     throw new Exception("task failed")
+                    // }
                 }
                 break
             case "unit-test":
@@ -71,9 +71,9 @@ def runtasks(branch,repo,commitID,tasks,common) {
                 jobs[taskName] = {
                     def result_map = common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
                     task_result_array << result_map
-                    if (result_map.taskResult != "SUCCESS") {
-                        throw new Exception("task failed")
-                    }
+                    // if (result_map.taskResult != "SUCCESS") {
+                    //     throw new Exception("task failed")
+                    // }
                 }
                 break
             case "gosec":
@@ -97,7 +97,7 @@ def runtasks(branch,repo,commitID,tasks,common) {
         throw new Exception("task failed")
     } finally {
         stage("summary") {
-            println task_result_array
+            // println task_result_array
             for (result_map in task_result_array) {
                 if (result_map.taskResult != "SUCCESS") {
                     println "${result_map.name} task failed"
@@ -108,6 +108,8 @@ def runtasks(branch,repo,commitID,tasks,common) {
                 }
             }
         }
+
+        return task_result_array
     }
 }
 
@@ -128,7 +130,10 @@ node("${GO_BUILD_SLAVE}") {
             try {
                 stage("verify: " + ref) {
                     common.cacheCode(REPO,commitID,ref,"")
-                    runtasks(ref,repo,commitID,configs.tasks,common) 
+                    def task_result_array = runtasks(ref,repo,commitID,configs.tasks,common) 
+                    for (result_map in task_result_array) {
+                        println result_map.name
+                    }
                 }     
             } catch (Exception e) {
                 taskFailed = true

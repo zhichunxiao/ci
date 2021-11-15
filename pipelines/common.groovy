@@ -116,22 +116,23 @@ def parseCommonConfig(config) {
     return commonConfig
 }
 
-def triggerTask(atomJobName,taskName,params) {
-    println("${taskName}::: ${atomJobName}")
-    result = build(job: atomJobName, parameters: params, wait: true,propagate: false)
-    if (result.getResult() != "SUCCESS" && atomJobName in ["atom-ut", "atom-gosec"]) {
+
+def triggerTask(taskName,params) {
+    result = build(job: taskName, parameters: params, wait: true,propagate: false)
+
+    if (result.getResult() != "SUCCESS" && taskName in ["atom-ut", "atom-gosec"]) {
         println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/tests")
     } else {
         println("Detail: ${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}/pipeline")
     }
     if (result.getDescription() != null && result.getDescription() != "") {
-        println("${taskName} ${result.getResult()}: ${result.getDescription()}")
+        println("task ${result.getResult()}: ${result.getDescription()}")
     } else {
-        println("${taskName} ${result.getResult()}")
+        println("task ${result.getResult()}")
     }
     
     def resp_map = {}
-    resp_map["atomJob"] = atomJobName
+    resp_map["atomJob"] = taskName
     resp_map["name"] = taskName
     resp_map["taskResult"] = result.getResult()
     resp_map["taskSummary"] = result.getDescription()

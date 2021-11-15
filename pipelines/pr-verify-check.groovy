@@ -17,8 +17,8 @@ node("${GO_BUILD_SLAVE}") {
         }
         jobs = [:]
         for (task in configs.tasks) {
-            taskType = task.taskType.toString()
-            taskName =task.name.toString()
+            def taskType = task.taskType.toString()
+            def taskName =task.name.toString()
             switch(taskType) {
                 case "build":
                     def buildConfig = common.parseBuildConfig(task)
