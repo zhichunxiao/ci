@@ -126,7 +126,7 @@ try {
                 println "finally"
                 sh """
                 wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_cyclo/tiinsight-agent-cyclo.py
-                python3 tiinsight-agent-cyclo.py ${REPO} "master" ${COMMIT_ID} ${REPO}/repo_cyclo.log
+                python3 tiinsight-agent-cyclo.py ${REPO} ${BRANCH} ${COMMIT_ID} ${REPO}/repo_cyclo.log
                 """
                 sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-cyclo/agent-cyclo.py
