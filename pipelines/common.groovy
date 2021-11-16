@@ -49,8 +49,8 @@ class CommonConfig {
 }
 
 class NotifyConfig {
-    ArrayList<String> emails;
-    ArrayList<String> larks;
+    String[] emails;
+    String[] larks;
 }
 
 
