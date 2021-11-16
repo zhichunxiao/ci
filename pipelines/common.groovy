@@ -48,6 +48,11 @@ class CommonConfig {
     SecretVar[] secretVars;
 }
 
+class NotifyConfig {
+    ArrayList<String> emails;
+    ArrayList<String> larks;
+}
+
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
@@ -70,6 +75,13 @@ def parseSecretVars(secretVars) {
         vars.push(var)
     }
     return vars
+}
+
+def parseNotifyConfig(notifyConfig) {
+    config = new NotifyConfig()
+    config.emails = notifyConfig.emails
+    config.larks = notifyConfig.larks
+    return config
 }
 
 def parseBuildConfig(config) {

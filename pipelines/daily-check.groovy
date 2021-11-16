@@ -17,6 +17,9 @@ if (repoInfo.length == 2) {
     repo = repoInfo[1]
 }
 
+def taskStartTimeInMillis = System.currentTimeMillis()
+
+
 // >> TODO remote debug code here
 REPO = 'pingcap/tidb'
 repo = "tidb"
@@ -37,9 +40,9 @@ def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/mas
 configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci-deubug.yaml"
 
 
-def runtasks(branch,repo,commitID,tasks,common) {
+def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
     jobs = [:]
-    def task_result_array = []
+    // def task_result_array = []
     for (task in tasks) {
         def taskType = task.taskType.toString()
         def taskName =task.name.toString()
@@ -47,12 +50,11 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "build":
                 def buildConfig = common.parseBuildConfig(task)
                 jobs[taskName] = {
-                    def result_map = [:]
-                    result_map = common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
-                    task_result_array << result_map
-                    // if (result_map.taskResult != "SUCCESS") {
-                    //     throw new Exception("task failed")
-                    // }
+                    def result = common.buildBinary(buildConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
                 }
                 break
             case "unit-test":
@@ -70,12 +72,11 @@ def runtasks(branch,repo,commitID,tasks,common) {
             case "cyclo": 
                 def cycloConfig = common.parseCycloConfig(task)
                 jobs[taskName] = {
-                    def result_map = [:]
-                    result_map = common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
-                    task_result_array << result_map
-                    // if (result_map.taskResult != "SUCCESS") {
-                    //     throw new Exception("task failed")
-                    // }
+                    def result = common.codeCyclo(cycloConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
                 }
                 break
             case "gosec":
@@ -92,27 +93,8 @@ def runtasks(branch,repo,commitID,tasks,common) {
                 break
         }
     }
-    
-    try {
-        parallel jobs
-    } catch (e) {
-        throw new Exception("task failed")
-    } finally {
-        stage("summary") {
-            // println task_result_array
-            for (result_map in task_result_array) {
-                if (result_map.taskResult != "SUCCESS") {
-                    println "${result_map.name} task failed"
-                }
-                if (result_map.taskSummary != null && result_map.taskSummary != "") {
-                    println("${result_map.name} ${result_map.taskResult}: ${result_map.taskSummary}")
-                    println("${result_map.name} #${result_map.buildNumber}: ${result_map.url}")
-                }
-            }
-        }
 
-        return task_result_array
-    }
+    parallel jobs
 }
 
 node("${GO_BUILD_SLAVE}") {
@@ -125,25 +107,66 @@ node("${GO_BUILD_SLAVE}") {
         // << TODO remote debug code here
 
         configs = common.getConfig(configfile)
+        notifyConfig = configs.getNotifyConfig(configfile)
         refs  = configs.defaultRefs
         taskFailed = false
+        def all_results = []
+        def branchMasterCommit = ""
         for (ref in refs) {
             def commitID = get_sha(ref)
+            if (ref == "master") {
+                branchMasterCommit = commitID
+            }
+            def task_result_array = []
             try {
-                stage("verify: " + ref) {
+                stage(ref) {
                     common.cacheCode(REPO,commitID,ref,"")
-                    def task_result_array = runtasks(ref,repo,commitID,configs.tasks,common) 
-                    
-                    for (result_map in task_result_array) {
-                        println result_map.name
-                    }
+                    runtasks(ref,repo,commitID,configs.tasks,common,task_result_array)       
                 }     
             } catch (Exception e) {
                 taskFailed = true
+                currentBuild.result = "FAILURE"
+            } finally {
+                stage("summary ${ref}") {
+                    for (result_map in task_result_array) {
+                        all_results << [name: result_map.name, 
+                            type: result_map.type,
+                            result: result_map.result.getResult(), 
+                            fullDisplayName: result_map.result.getFullDisplayName(), 
+                            buildNumber: result_map.result.getNumber().toString(),
+                            summary: result_map.result.getDescription(),
+                            duration: result_map.result.getDurationString(),
+                            startTime: "${result_map.result.getStartTimeInMillis()}",
+                            url: "${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result_map.result.getFullProjectName()}/detail/${result_map.result.getFullProjectName()}/${result_map.result.getNumber().toString()}/pipeline"
+                            ]
+                        if (result_map.result.getDescription() != null && result_map.result.getDescription() != "") {
+                            println "${result_map.name} ${result_map.result.getResult()}: ${result_map.result.getDescription()}"       
+                        } else {
+                            println "${result_map.name} ${result_map.result.getResult()}"       
+                        }
+                    }
+                } 
             }           
         }
-        if (taskFailed) {
-            throw new RuntimeException("task failed")
-        }
+
+        all_results << [name: JOB_NAME,
+            result: currentBuild.result,
+            buildNumber: BUILD_NUMBER,
+            type: "dailyci-pipeline",
+            commitID: branchMasterCommit, 
+            branch: "master",
+            repo: "tidb",
+            url: "${env.RUN_DISPLAY_URL}", 
+            startTime: taskStartTimeInMillis, 
+            duration: System.currentTimeMillis() - taskStartTimeInMillis,
+            trigger: "daily"            
+            ]
+        def json = groovy.json.JsonOutput.toJson(all_results)
+        sh """
+        wget python3.py
+        python3 python3.py "${json}"
+        """
+        println json
+        
     }
 }
