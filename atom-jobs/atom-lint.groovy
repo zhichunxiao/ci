@@ -66,7 +66,7 @@ def run_with_pod(Closure body) {
     def label = "lint-check-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
-    def pod_go_docker_image = "hub-new.pingcap.net/jenkins/centos7_golang-1.16"
+    def pod_go_docker_image = "hub.pingcap.net/jenkins/centos7_golang-1.16"
     def jnlp_docker_image = "jenkins/inbound-agent:4.3-4"
     podTemplate(label: label,
             cloud: cloud,
@@ -149,6 +149,10 @@ try {
             } catch (err) {
                 throw err
             } finally {
+                sh """
+                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_lint/tiinsight-agent-lint.py
+                python3 tiinsight-agent-lint.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${REPO}/${REPORT_DIR}
+                """
                 junit(
                     allowEmptyResults: true,
                     testResults: "${REPO}/${REPORT_DIR}"
