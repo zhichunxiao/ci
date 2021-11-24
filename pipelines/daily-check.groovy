@@ -19,15 +19,6 @@ if (repoInfo.length == 2) {
 
 def taskStartTimeInMillis = System.currentTimeMillis()
 
-
-// >> TODO remote debug code here
-REPO = 'pingcap/tidb'
-repo = "tidb"
-org = "pingcap"
-branch = "master"
-// << TODO remote debug code here
-
-
 def get_sha(branch) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${branch} -s=${FILE_SERVER_URL}").trim()
@@ -35,14 +26,9 @@ def get_sha(branch) {
 
 def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/master/${repo}/daily.yaml"
 
-// >> TODO remote debug code here
-// configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci.yaml"
-configfile = "https://raw.githubusercontent.com/purelind/test-ci/main/dailyci-deubug.yaml"
-
 
 def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
     jobs = [:]
-    // def task_result_array = []
     for (task in tasks) {
         def taskType = task.taskType.toString()
         def taskName =task.name.toString()
@@ -60,13 +46,21 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
             case "unit-test":
                 def unitTestConfig = common.parseUnitTestConfig(task)
                 jobs[taskName] = {
-                    common.unitTest(unitTestConfig,repo,commitID,branch,taskName,"daily")
+                    def result = common.unitTest(unitTestConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
                 }
                 break
             case "lint":
                 def lintConfig = common.parseLintConfig(task)
                 jobs[taskName] = {
-                    common.codeLint(lintConfig,repo,commitID,branch,taskName,"daily")
+                    def result = common.codeLint(lintConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
                 }
                 break
             case "cyclo": 
@@ -82,13 +76,21 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
             case "gosec":
                 def gosecConfig = common.parseGosecConfig(task)
                 jobs[taskName] = {
-                    common.codeGosec(gosecConfig,repo,commitID,branch,taskName,"daily")
+                    def result = common.codeGosec(gosecConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
                 }
                 break
             case "common":
                 def commonConfig = common.parseCommonConfig(task)
                 jobs[taskName] = {
-                    common.codeCommon(commonConfig,repo,commitID,branch,taskName,"daily")
+                    def result = common.codeCommon(commonConfig,repo,commitID,branch,taskName,"daily")
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
                 }
                 break
         }
@@ -99,17 +101,10 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
 
 node("${GO1160_BUILD_SLAVE}") {
     container("golang") {
-        // checkout scm
-        // def common = load "pipelines/common.groovy"
-        // >> TODO remote debug code here
-        sh "wget https://raw.githubusercontent.com/purelind/jenkins-templates/purelind/task-summary/pipelines/common.groovy"
-        def common = load "common.groovy"
-        // << TODO remote debug code here
+        checkout scm
+        def common = load "pipelines/common.groovy"
 
         configs = common.getConfig(configfile)
-        println "${configs.notify.larks}"
-        println "${configs.notify.emails}"
-        println "${configs.notify.slack}"
         refs  = configs.defaultRefs
         taskFailed = false
         def all_results = []
@@ -177,10 +172,6 @@ node("${GO1160_BUILD_SLAVE}") {
         sh """
         wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-dailyci.py
         python3 agent-dailyci.py dailyciResult.json
-        """
-
-
-
-        
+        """  
     }
 }
