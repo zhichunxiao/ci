@@ -16,6 +16,7 @@ node("${GO_BUILD_SLAVE}") {
             common.cacheCode(ghprbGhRepository,ghprbActualCommit,"",ghprbPullId)
         }
         jobs = [:]
+        def task_result_array = []
         for (task in configs.tasks) {
             def taskType = task.taskType.toString()
             def taskName =task.name.toString()
@@ -23,37 +24,61 @@ node("${GO_BUILD_SLAVE}") {
                 case "build":
                     def buildConfig = common.parseBuildConfig(task)
                     jobs[taskName] = {
-                        common.buildBinary(buildConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        def result = common.buildBinary(buildConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        task_result_array << ["name": taskName, "type": taskType, "result": result]
+                        if (result.getResult() != "SUCCESS") {
+                            throw new Exception("${taskName} failed")
+                        }
                     }
                     break
                 case "unit-test":
                     def unitTestConfig = common.parseUnitTestConfig(task)
                     jobs[taskName] = {
-                        common.unitTest(unitTestConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        def result = common.unitTest(unitTestConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        task_result_array << ["name": taskName, "type": taskType, "result": result]
+                        if (result.getResult() != "SUCCESS") {
+                            throw new Exception("${taskName} failed")
+                        }
                     }
                     break
                 case "lint":
                     def lintConfig = common.parseLintConfig(task)
                     jobs[taskName] = {
-                        common.codeLint(lintConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        def result = common.codeLint(lintConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        task_result_array << ["name": taskName, "type": taskType, "result": result]
+                        if (result.getResult() != "SUCCESS") {
+                            throw new Exception("${taskName} failed")
+                        }
                     }
                     break
                 case "cyclo": 
                     def cycloConfig = common.parseCycloConfig(task)
                     jobs[taskName] = {
-                        common.codeCyclo(cycloConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        def result = common.codeCyclo(cycloConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        task_result_array << ["name": taskName, "type": taskType, "result": result]
+                        if (result.getResult() != "SUCCESS") {
+                            throw new Exception("${taskName} failed")
+                        }
                     }
                     break
                 case "gosec":
                     def gosecConfig = common.parseGosecConfig(task)
                     jobs[taskName] = {
-                        common.codeGosec(gosecConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        def result = common.codeGosec(gosecConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        task_result_array << ["name": taskName, "type": taskType, "result": result]
+                        if (result.getResult() != "SUCCESS") {
+                            throw new Exception("${taskName} failed")
+                        }
                     }
                     break
                 case "common":
                     def commonConfig = common.parseCommonConfig(task)
                     jobs[taskName] = {
-                        common.codeCommon(commonConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        def result = common.codeCommon(commonConfig,repo,ghprbActualCommit,ghprbTargetBranch,taskName,"pull_request")
+                        task_result_array << ["name": taskName, "type": taskType, "result": result]
+                        if (result.getResult() != "SUCCESS") {
+                            throw new Exception("${taskName} failed")
+                        }
                     }
                     break
             }
