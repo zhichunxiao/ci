@@ -143,15 +143,6 @@ def triggerTask(taskName,params) {
     } else {
         println("task ${result.getResult()}")
     }
-    
-    // def resp_map = {}
-    // resp_map["atomJob"] = taskName
-    // resp_map["name"] = taskName
-    // resp_map["taskResult"] = result.getResult()
-    // resp_map["taskSummary"] = result.getDescription()
-    // resp_map["resultObject"] = result
-    // resp_map["buildNumber"] = result.getNumber().toString()
-    // resp_map["url"] = "${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result.getFullProjectName()}/detail/${result.getFullProjectName()}/${result.getNumber().toString()}"
 
     return result
 }
@@ -184,9 +175,7 @@ def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'TASK_NAME', value: taskName),
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    // triggerTask("atom-build",buildParams)
-    // TODO debug pipeline
-    triggerTask("debug-pipeline2",buildParams)
+    triggerTask("atom-build",buildParams)
 }
 
 def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
@@ -248,10 +237,7 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    // triggerTask("atom-cyclo","taskName",cycloParams)
-    // TODO debug pipeline
-    triggerTask("debug-pipeline1",cycloParams)
-
+    triggerTask("atom-cyclo","taskName",cycloParams)
 }
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
