@@ -161,8 +161,8 @@ node("${GO1160_BUILD_SLAVE}") {
             ]
         all_results << [name: "ci-notify",
             type: "ci-notify",
-            lark: configs.notify.larks,
-            email: configs.notify.emails]
+            lark: configs.notify.lark,
+            email: configs.notify.email]
         def json = groovy.json.JsonOutput.toJson(all_results)
         println "all_results: ${json}"
         writeJSON file: 'dailyciResult.json', json: json, pretty: 4
