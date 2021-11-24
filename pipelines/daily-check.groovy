@@ -97,7 +97,7 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
     parallel jobs
 }
 
-node("${GO_BUILD_SLAVE}") {
+node("${GO1160_BUILD_SLAVE}") {
     container("golang") {
         // checkout scm
         // def common = load "pipelines/common.groovy"
@@ -107,7 +107,9 @@ node("${GO_BUILD_SLAVE}") {
         // << TODO remote debug code here
 
         configs = common.getConfig(configfile)
-        notifyConfig = configs.getNotifyConfig(configfile)
+        println "${configs.notify.larks}"
+        println "${configs.notify.emails}"
+        println "${configs.notify.slack}"
         refs  = configs.defaultRefs
         taskFailed = false
         def all_results = []
@@ -135,8 +137,9 @@ node("${GO_BUILD_SLAVE}") {
                             fullDisplayName: result_map.result.getFullDisplayName(), 
                             buildNumber: result_map.result.getNumber().toString(),
                             summary: result_map.result.getDescription(),
-                            duration: result_map.result.getDurationString(),
-                            startTime: "${result_map.result.getStartTimeInMillis()}",
+                            durationStr: result_map.result.getDurationString(),
+                            duration: result_map.result.getDuration(),
+                            startTime: result_map.result.getStartTimeInMillis(),
                             url: "${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result_map.result.getFullProjectName()}/detail/${result_map.result.getFullProjectName()}/${result_map.result.getNumber().toString()}/pipeline"
                             ]
                         if (result_map.result.getDescription() != null && result_map.result.getDescription() != "") {
@@ -161,12 +164,23 @@ node("${GO_BUILD_SLAVE}") {
             duration: System.currentTimeMillis() - taskStartTimeInMillis,
             trigger: "daily"            
             ]
+        all_results << [name: "ci-notify",
+            type: "ci-notify",
+            lark: configs.notify.larks,
+            email: configs.notify.emails]
         def json = groovy.json.JsonOutput.toJson(all_results)
+        println "all_results: ${json}"
+        writeJSON file: 'dailyciResult.json', json: json, pretty: 4
+        sh 'cat dailyciResult.json'
+        archiveArtifacts artifacts: 'dailyciResult.json', fingerprint: true
+
         sh """
-        wget python3.py
-        python3 python3.py "${json}"
+        wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-dailyci.py
+        python3 agent-dailyci.py dailyciResult.json
         """
-        println json
+
+
+
         
     }
 }

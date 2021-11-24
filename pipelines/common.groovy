@@ -78,7 +78,8 @@ def parseSecretVars(secretVars) {
 }
 
 def parseNotifyConfig(notifyConfig) {
-    config = new NotifyConfig()
+    def config = new NotifyConfig()
+    if (notifyConfig)
     config.emails = notifyConfig.emails
     config.larks = notifyConfig.larks
     return config
