@@ -48,11 +48,6 @@ class CommonConfig {
     SecretVar[] secretVars;
 }
 
-class NotifyConfig {
-    String[] emails;
-    String[] larks;
-}
-
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
@@ -77,13 +72,6 @@ def parseSecretVars(secretVars) {
     return vars
 }
 
-def parseNotifyConfig(notifyConfig) {
-    def config = new NotifyConfig()
-    if (notifyConfig)
-    config.emails = notifyConfig.emails
-    config.larks = notifyConfig.larks
-    return config
-}
 
 def parseBuildConfig(config) {
     def buildConfig = new BuildConfig()
@@ -237,7 +225,7 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    triggerTask("atom-cyclo","taskName",cycloParams)
+    triggerTask("atom-cyclo",cycloParams)
 }
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
