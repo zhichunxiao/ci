@@ -124,7 +124,7 @@ node("${GO1160_BUILD_SLAVE}") {
                 taskFailed = true
                 currentBuild.result = "FAILURE"
             } finally {
-                stage("summary ${ref}") {
+                stage("daily: ${ref}") {
                     for (result_map in task_result_array) {
                         all_results << [name: result_map.name, 
                             type: result_map.type,
