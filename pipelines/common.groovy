@@ -205,7 +205,9 @@ def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
         string(name: 'SECRET_VARS', value: secretVarsString),
     ]
-    triggerTask("atom-ut",utParams)
+    // TODO Debug here
+    // triggerTask("atom-ut",utParams)
+    triggerTask("debug-atom-ut",utParams)
 }
 
 def codeGosec(gosecConfig,repo,commitID,branch,taskName,triggerEvent) {
