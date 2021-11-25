@@ -105,53 +105,47 @@ node("${GO1160_BUILD_SLAVE}") {
         def common = load "pipelines/common.groovy"
 
         configs = common.getConfig(configfile)
-        refs  = configs.defaultRefs
+        ref  = configs.defaultRef
         taskFailed = false
         def all_results = []
-        def branchMasterCommit = ""
-        for (ref in refs) {
-            def commitID = get_sha(ref)
-            if (ref == "master") {
-                branchMasterCommit = commitID
-            }
-            def task_result_array = []
-            try {
-                stage(ref) {
-                    common.cacheCode(REPO,commitID,ref,"")
-                    runtasks(ref,repo,commitID,configs.tasks,common,task_result_array)       
-                }     
-            } catch (Exception e) {
-                taskFailed = true
-                currentBuild.result = "FAILURE"
-            } finally {
-                stage("daily: ${ref}") {
-                    for (result_map in task_result_array) {
-                        all_results << [name: result_map.name, 
-                            type: result_map.type,
-                            result: result_map.result.getResult(), 
-                            fullDisplayName: result_map.result.getFullDisplayName(), 
-                            buildNumber: result_map.result.getNumber().toString(),
-                            summary: result_map.result.getDescription(),
-                            durationStr: result_map.result.getDurationString(),
-                            duration: result_map.result.getDuration(),
-                            startTime: result_map.result.getStartTimeInMillis(),
-                            url: "${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result_map.result.getFullProjectName()}/detail/${result_map.result.getFullProjectName()}/${result_map.result.getNumber().toString()}/pipeline"
-                            ]
-                        if (result_map.result.getDescription() != null && result_map.result.getDescription() != "") {
-                            println "${result_map.name} ${result_map.result.getResult()}: ${result_map.result.getDescription()}"       
-                        } else {
-                            println "${result_map.name} ${result_map.result.getResult()}"       
-                        }
+        def commitID = get_sha(ref)
+        def task_result_array = []
+        try {
+            stage(ref) {
+                common.cacheCode(REPO,commitID,ref,"")
+                runtasks(ref,repo,commitID,configs.tasks,common,task_result_array)       
+            }     
+        } catch (Exception e) {
+            taskFailed = true
+            currentBuild.result = "FAILURE"
+        } finally {
+            stage("daily summary") {
+                for (result_map in task_result_array) {
+                    all_results << [name: result_map.name, 
+                        type: result_map.type,
+                        result: result_map.result.getResult(), 
+                        fullDisplayName: result_map.result.getFullDisplayName(), 
+                        buildNumber: result_map.result.getNumber().toString(),
+                        summary: result_map.result.getDescription(),
+                        durationStr: result_map.result.getDurationString(),
+                        duration: result_map.result.getDuration(),
+                        startTime: result_map.result.getStartTimeInMillis(),
+                        url: "${CI_JENKINS_BASE_URL}/blue/organizations/jenkins/${result_map.result.getFullProjectName()}/detail/${result_map.result.getFullProjectName()}/${result_map.result.getNumber().toString()}/pipeline"
+                        ]
+                    if (result_map.result.getDescription() != null && result_map.result.getDescription() != "") {
+                        println "${result_map.name} ${result_map.result.getResult()}: ${result_map.result.getDescription()}"       
+                    } else {
+                        println "${result_map.name} ${result_map.result.getResult()}"       
                     }
-                } 
-            }           
-        }
-
+                }
+            } 
+        }           
+        
         all_results << [name: JOB_NAME,
             result: currentBuild.result,
             buildNumber: BUILD_NUMBER,
             type: "dailyci-pipeline",
-            commitID: branchMasterCommit, 
+            commitID: commitID, 
             branch: "master",
             repo: repo,
             org: org,
