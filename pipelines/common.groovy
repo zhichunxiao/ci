@@ -185,13 +185,13 @@ def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
 
 def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
-    secretVars = []
+    def secretVars = []
     def shellScript = unitTestConfig.shellScript
     for (sVar in unitTestConfig.secretVars) {
         secretVars.push(sVar.secretID + ":" + sVar.key)
         shellScript = shellScript.replace("\${" + sVar.key + "}" , "\$" + sVar.key) 
     }
-    secretVarsString = secretVars.join(",")
+    def secretVarsString = secretVars.join(",")
     utParams = [
         string(name: 'REPO', value: repo),
         string(name: 'COMMIT_ID', value: commitID),
