@@ -21,16 +21,17 @@ class BuildConfig {
 }
 
 class UnitTestConfig {
-   String shellScript;
-   String utReportDir;
-   String covReportDir;
-   String coverageRate;
-   Env env;
+    String shellScript;
+    String utReportDir;
+    String covReportDir;
+    String coverageRate;
+    SecretVar[] secretVars;
+    Env env;
 }
 
 class LintConfig {
-   String shellScript;
-   String reportDir;
+    String shellScript;
+    String reportDir;
 }
 
 class GosecConfig {
@@ -86,6 +87,7 @@ def parseUnitTestConfig(config) {
     unitTestConfig.covReportDir = config.covReportDir.toString()
     unitTestConfig.shellScript = config.shellScript.toString()
     unitTestConfig.coverageRate = config.coverageRate.toString()
+    unitTestConfig.secretVars = parseSecretVars(config.secretVar)
     return unitTestConfig
 }
 
@@ -183,11 +185,18 @@ def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
 
 def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
+    def secretVars = []
+    def shellScript = unitTestConfig.shellScript
+    for (sVar in unitTestConfig.secretVars) {
+        secretVars.push(sVar.secretID + ":" + sVar.key)
+        shellScript = shellScript.replace("\${" + sVar.key + "}" , "\$" + sVar.key) 
+    }
+    def secretVarsString = secretVars.join(",")
     utParams = [
         string(name: 'REPO', value: repo),
         string(name: 'COMMIT_ID', value: commitID),
         string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
-        text(name: 'TEST_CMD', value: unitTestConfig.shellScript),
+        text(name: 'TEST_CMD', value: shellScript),
         string(name: 'UT_REPORT_DIR', value: unitTestConfig.utReportDir),
         string(name: 'COV_REPORT_DIR', value: unitTestConfig.covReportDir),
         string(name: 'COVERAGE_RATE', value: unitTestConfig.coverageRate),
@@ -195,6 +204,7 @@ def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'BRANCH', value: branch),
         string(name: 'TASK_NAME', value: taskName),
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
+        string(name: 'SECRET_VARS', value: secretVarsString),
     ]
     triggerTask("atom-ut",utParams)
 }
