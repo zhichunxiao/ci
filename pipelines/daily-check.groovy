@@ -170,9 +170,11 @@ node("${GO1160_BUILD_SLAVE}") {
         sh 'cat dailyciResult.json'
         archiveArtifacts artifacts: 'dailyciResult.json', fingerprint: true
 
-        sh """
-        wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-dailyci.py
-        python3 agent-dailyci.py dailyciResult.json
-        """  
+        if (currentBuild.result == "FAILURE") {
+            sh """
+                wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-dailyci.py
+                python3 agent-dailyci.py dailyciResult.json
+            """  
+        }
     }
 }
