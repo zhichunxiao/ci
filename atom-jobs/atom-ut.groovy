@@ -58,6 +58,11 @@ gocov convert cover.out | gocov-xml > coverage.xml
             name: 'TASK_NAME',
             trim: true
         ),
+        string(
+            defaultValue: '',
+            name: 'SECRET_VARS',
+            trim: true
+        ),
     ])
 ])
 
@@ -115,6 +120,15 @@ run_with_pod {
                 '''
             }
 
+            credentialList =[]
+            varStrings = SECRET_VARS.split(",")
+            for (varString in varStrings) {
+                keyAndValue = varString.split(":")
+                if (keyAndValue.length == 2) {
+                    credentialList.push(string(credentialsId: keyAndValue[0], variable: keyAndValue[1]))
+                }
+            }
+
             stage("Test") {
                 dir("${ws}/${REPO}") {
                     sh '''
@@ -122,7 +136,9 @@ run_with_pod {
                         go get github.com/axw/gocov/gocov
                         go get github.com/AlekSi/gocov-xml
                     '''
-                    sh TEST_CMD
+                    withCredentials(credentialList) {
+                        sh TEST_CMD
+                    }
                 }
             }
 
