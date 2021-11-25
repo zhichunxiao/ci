@@ -7,7 +7,7 @@ if (repoInfo.length == 2) {
 def configfile = "https://raw.githubusercontent.com/PingCAP-QE/devops-config/main/${repo}/verify.yaml"
 
 
-node("${GO_BUILD_SLAVE}") {
+node("${GO1160_BUILD_SLAVE}") {
     container("golang") {
         checkout scm
         def common = load "pipelines/common.groovy"
