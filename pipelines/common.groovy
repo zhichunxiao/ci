@@ -72,6 +72,7 @@ def parseSecretVars(secretVars) {
     return vars
 }
 
+
 def parseBuildConfig(config) {
     def buildConfig = new BuildConfig()
     buildConfig.outputDir = config.outputDir.toString()
@@ -116,6 +117,7 @@ def parseCommonConfig(config) {
     return commonConfig
 }
 
+
 def triggerTask(taskName,params) {
     result = build(job: taskName, parameters: params, wait: true,propagate: false)
 
@@ -130,9 +132,7 @@ def triggerTask(taskName,params) {
         println("task ${result.getResult()}")
     }
 
-    if (result.getResult() != "SUCCESS") {
-        throw new Exception("task failed")
-    }
+    return result
 }
 
 
