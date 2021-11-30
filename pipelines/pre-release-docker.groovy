@@ -93,6 +93,7 @@ def release_one(repo,arch,failpoint) {
     def imageName = repo
     if (repo == "tics") {
         imageName = "tiflash"
+        dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-${arch}/tiflash"
     }
     if (repo == "monitoring") {
         imageName = "tidb-monitor-initializer"
