@@ -45,7 +45,7 @@ def get_sha(repo,branch) {
 
 IMAGE_TAG = RELEASE_TAG + "-pre"
 
-def release_one(repo,failpoint) {
+def release_one(repo,arch,failpoint) {
     def actualRepo = repo
     if (repo == "br" && RELEASE_TAG >= "v5.2.0") {
         actualRepo = "tidb"
@@ -60,12 +60,12 @@ def release_one(repo,failpoint) {
     if (repo == "monitoring") {
         sha1 =  get_sha(actualRepo,RELEASE_BRANCH)
     }
-    def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+    def binary = "builds/pingcap/${repo}/test/${RELEASE_TAG}/${sha1}/linux-${arch}/${repo}.tar.gz"
     if (failpoint) {
-        binary = "builds/pingcap/${repo}/test/failpoint/${RELEASE_TAG}/${sha1}/linux-amd64/${repo}.tar.gz"
+        binary = "builds/pingcap/${repo}/test/failpoint/${RELEASE_TAG}/${sha1}/linux-${arch}/${repo}.tar.gz"
     }
     def paramsBuild = [
-        string(name: "ARCH", value: "amd64"),
+        string(name: "ARCH", value: arch),
         string(name: "OS", value: "linux"),
         string(name: "EDITION", value: "community"),
         string(name: "OUTPUT_BINARY", value: binary),
@@ -89,19 +89,25 @@ def release_one(repo,failpoint) {
             wait: true,
             parameters: paramsBuild
 
-    def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/${repo}"
-    def image = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG},pingcap/${repo}:${IMAGE_TAG}"
+    def dockerfile = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-${arch}/${repo}"
+    def imageName = repo
     if (repo == "tics") {
-        image = image + ",hub.pingcap.net/qa/tiflash:${IMAGE_TAG},pingcap/tiflash:${IMAGE_TAG}"
+        imageName = "tiflash"
     }
     if (repo == "monitoring") {
-        image = "hub.pingcap.net/qa/tidb-monitor-initializer:${IMAGE_TAG},pingcap/tidb-monitor-initializer:${IMAGE_TAG}"
+        imageName = "tidb-monitor-initializer"
     }
+    if (arch == "arm64") {
+        imageName = imageName + "-arm64"
+    }
+
+    def image = "hub.pingcap.net/qa/${imageName}:${IMAGE_TAG},pingcap/${imageName}:${IMAGE_TAG}"
     if (failpoint) {
         image = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG}-failpoint"
     }
+
     def paramsDocker = [
-        string(name: "ARCH", value: "amd64"),
+        string(name: "ARCH", value: arch),
         string(name: "OS", value: "linux"),
         string(name: "INPUT_BINARYS", value: binary),
         string(name: "REPO", value: repo),
@@ -115,7 +121,7 @@ def release_one(repo,failpoint) {
             parameters: paramsDocker
 
 
-    if (NEED_DEBUG_IMAGE) {
+    if (NEED_DEBUG_IMAGE && arch == "amd64") {
         def dockerfileForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/${repo}"
         def imageForDebug = "hub.pingcap.net/qa/${repo}:${IMAGE_TAG}-debug"
         if (failpoint) {
@@ -140,8 +146,12 @@ def release_one(repo,failpoint) {
     
 
     if (repo == "br") {
-        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
-        def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${IMAGE_TAG},pingcap/tidb-lightning:${IMAGE_TAG}"
+        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-${arch}/lightning"
+        imageName = "tidb-lightning"
+        if (arch == "arm64") {
+            imageName = imageName + "-arm64"
+        }
+        def imageLightling = "hub.pingcap.net/qa/${imageName}:${IMAGE_TAG},pingcap/${imageName}:${IMAGE_TAG}"
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
@@ -156,7 +166,7 @@ def release_one(repo,failpoint) {
                 wait: true,
                 parameters: paramsDockerLightning
 
-        if (NEED_DEBUG_IMAGE) {
+        if (NEED_DEBUG_IMAGE && arch == "amd64") {
             def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
             def imageLightlingForDebug = "hub.pingcap.net/qa/tidb-lightning:${IMAGE_TAG}-debug"
             def paramsDockerLightningForDebug = [
@@ -183,19 +193,27 @@ stage ("release") {
             builds = [:]
             for (item in releaseRepos) {
                 def product = "${item}"
-                builds["build ${item}"] = {
-                    release_one(product,false)
+                builds["build ${item} amd64"] = {
+                    release_one(product,"amd64",false)
                 }
             }
+
+            for (item in releaseRepos) {
+                def product = "${item}"
+                builds["build ${item} arm64"] = {
+                    release_one(product,"arm64",false)
+                }
+            }
+
             failpointRepos = ["tidb","pd","tikv"]
             for (item in failpointRepos) {
                 def product = "${item}"
                 builds["build ${item} failpoint"] = {
-                    release_one(product,true)
+                    release_one(product,"amd64",true)
                 }
             }
             parallel builds
         }
     }
 }
-
+// product/arch/failpoint/debug
