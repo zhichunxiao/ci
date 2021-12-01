@@ -69,7 +69,7 @@ def download() {
 }
 
 // 构建出的镜像名称
-imagePlaceHolder = "placeholder"
+imagePlaceHolder = UUID.randomUUID().toString()
 // 使用非默认脚本构建镜像，构建出的镜像名称需要在下面定义 
 if (PRODUCT == "tics" ) {
     if (RELEASE_TAG.length() > 1) {
@@ -77,9 +77,6 @@ if (PRODUCT == "tics" ) {
     }else {
         imagePlaceHolder = "hub.pingcap.net/tiflash/tiflash-ci-centos7"
     }
-}
-if (PRODUCT == "monitoring" ) {
-    imagePlaceHolder = "pingcap/tidb-monitor-initializer"
 }
 
 // 定义非默认的构建镜像脚本
@@ -93,7 +90,7 @@ fi;
 """
 
 buildImgagesh["monitoring"] = """
-docker build -t pingcap/tidb-monitor-initializer .
+docker build -t ${imagePlaceHolder} .
 """
 
 buildImgagesh["tiem"] = """
@@ -162,6 +159,8 @@ def release_images() {
            }
        }
     }
+    // 清理镜像
+    sh "docker rmi ${imagePlaceHolder} || true"
 }
 
 def release() {
