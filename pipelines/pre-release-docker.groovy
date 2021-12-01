@@ -154,7 +154,7 @@ def release_one(repo,arch,failpoint) {
         }
         def imageLightling = "hub.pingcap.net/qa/${imageName}:${IMAGE_TAG},pingcap/${imageName}:${IMAGE_TAG}"
         def paramsDockerLightning = [
-            string(name: "ARCH", value: "amd64"),
+            string(name: "ARCH", value: arch),
             string(name: "OS", value: "linux"),
             string(name: "INPUT_BINARYS", value: binary),
             string(name: "REPO", value: "lightning"),
