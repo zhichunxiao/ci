@@ -1,7 +1,9 @@
 repo = "" // chanage to origin repo
+org = ""
 repoInfo = ghprbGhRepository.split("/")
 if (repoInfo.length == 2) {
     repo = repoInfo[1]
+    org = repoInfo[0]
 }
 
 def taskStartTimeInMillis = System.currentTimeMillis()
@@ -91,8 +93,7 @@ node("${GO1160_BUILD_SLAVE}") {
                 parallel jobs
             }
         } catch (e) {
-            println "error: ${e}"
-            currentBuild.setResult(Result.FAILURE)
+            currentBuild.result = "FAILURE"
         } finally {
             stage("summary") {
                 for (result_map in task_result_array) {
@@ -114,19 +115,23 @@ node("${GO1160_BUILD_SLAVE}") {
                     }
                 }
 
+                def trigger = ghprbPullAuthorLogin
+                if ( ghprbTriggerAuthorLogin != "" ) {
+                    trigger = ghprbTriggerAuthorLogin
+                }
                 all_results << [name: JOB_NAME,
                     result: currentBuild.result,
                     buildNumber: BUILD_NUMBER,
                     type: "verifyci-pipeline",
                     commitID: ghprbActualCommit, 
-                    pdID: ghprbPullId,
+                    prID: ghprbPullId,
                     branch: ghprbTargetBranch,
                     repo: repo,
                     org: org,
                     url: "${env.RUN_DISPLAY_URL}", 
                     startTime: taskStartTimeInMillis, 
                     duration: System.currentTimeMillis() - taskStartTimeInMillis,
-                    trigger: "comment on pr"            
+                    trigger: trigger            
                     ]
                 def lark_notify_github_id = []
                 lark_notify_github_id << ${ghprbPullAuthorLogin}
@@ -142,15 +147,15 @@ node("${GO1160_BUILD_SLAVE}") {
                 sh 'cat ciResult.json'
                 archiveArtifacts artifacts: 'ciResult.json', fingerprint: true
 
-                if (currentBuild.result == "FAILURE") {
-                    sh """
-                        wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-verifyci.py
-                        python3 agent-verifyci.py ciResult.json
-                    """  
+                if (config.get("notifyPolicy") != null && config.get("notifyPolicy") == "IfPipelineFail") {
+                    if (currentBuild.result == "FAILURE") {
+                        sh """
+                            wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-verifyci.py
+                            python3 agent-verifyci.py ciResult.json
+                        """  
+                    }
                 }
             } 
         }
-
-        
     }
 }
