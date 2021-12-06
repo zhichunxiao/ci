@@ -134,9 +134,9 @@ node("${GO1160_BUILD_SLAVE}") {
                     trigger: trigger            
                     ]
                 def lark_notify_github_id = []
-                lark_notify_github_id << ${ghprbPullAuthorLogin}
+                lark_notify_github_id << ghprbPullAuthorLogin
                 if ( ghprbTriggerAuthorLogin != "" && ghprbTriggerAuthorLogin != ghprbPullAuthorLogin) {
-                    lark_notify_github_id << ${ghprbTriggerAuthorLogin}
+                    lark_notify_github_id << ghprbTriggerAuthorLogin
                 }
                 all_results << [name: "ci-notify",
                     type: "ci-notify",
