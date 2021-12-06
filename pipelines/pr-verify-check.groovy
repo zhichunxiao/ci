@@ -147,7 +147,7 @@ node("${GO1160_BUILD_SLAVE}") {
                 sh 'cat ciResult.json'
                 archiveArtifacts artifacts: 'ciResult.json', fingerprint: true
 
-                if (config.get("notifyPolicy") != null && config.get("notifyPolicy") == "IfPipelineFail") {
+                if (configs.get("notifyPolicy") != null && configs.get("notifyPolicy") == "IfPipelineFail") {
                     if (currentBuild.result == "FAILURE") {
                         sh """
                             wget ${FILE_SERVER_URL}/download/rd-atom-agent/agent-verifyci.py
