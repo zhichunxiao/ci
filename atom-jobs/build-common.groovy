@@ -352,6 +352,9 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+if [ ${failpoint} == 'true' ]; then
+    make failpoint-enable
+fi;
 if [ ${REPO} == "tidb" ]; then
     make build_tools
 else
