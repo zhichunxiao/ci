@@ -123,6 +123,9 @@ def release_one(repo,failpoint) {
     if (repo == "br") {
         def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
         def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}"
+        if (failpoint) {
+            imageLightling = "${imageLightling}-failpoint"
+        }
         def paramsDockerLightning = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
@@ -139,6 +142,9 @@ def release_one(repo,failpoint) {
                 
         def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
         def imageLightningForDebug = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-debug"
+        if (failpoint) {
+            imageLightningForDebug = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-failpoint-debug"
+        }
         def paramsDockerLightningForDebug = [
             string(name: "ARCH", value: "amd64"),
             string(name: "OS", value: "linux"),
@@ -169,7 +175,7 @@ stage ("release") {
                     release_one(product,false)
                 }
             }
-            failpointRepos = ["tidb","pd","tikv"]
+            failpointRepos = ["tidb","pd","tikv","br"]
             for (item in failpointRepos) {
                 def product = "${item}"
                 builds["build ${item} failpoint"] = {
