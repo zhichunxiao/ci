@@ -132,7 +132,7 @@ run_with_pod {
             stage("Test") {
                 dir("${ws}/${REPO}") {
                     sh '''
-                        go get -u github.com/jstemmer/go-junit-report
+                        go get github.com/jstemmer/go-junit-report
                         go get github.com/axw/gocov/gocov
                         go get github.com/AlekSi/gocov-xml
                     '''
