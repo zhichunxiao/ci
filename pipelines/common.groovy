@@ -29,6 +29,11 @@ class UnitTestConfig {
     Env env;
 }
 
+class jenkinsITConfig {
+    String triggerJobName;
+    SecretVar[] secretVars;
+}
+
 class LintConfig {
     String shellScript;
     String reportDir;
@@ -89,6 +94,13 @@ def parseUnitTestConfig(config) {
     unitTestConfig.coverageRate = config.coverageRate.toString()
     unitTestConfig.secretVars = parseSecretVars(config.secretVar)
     return unitTestConfig
+}
+
+def parseJenkinsITConfig(config) {
+    def jenkinsITConfig = new jenkinsITConfig()
+    jenkinsITConfig.triggerJobName = config.name.toString()
+    jenkinsITConfig.secretVars = parseSecretVars(config.secretVar)
+    return jenkinsITConfig
 }
 
 def parseLintConfig(config) {
@@ -236,6 +248,18 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-cyclo",cycloParams)
+}
+
+
+def jenkinsItTrigger(jenkinsITConfig,taskName,ghprbTargetBranch,ghprbActualCommit,triggerEvent) {
+    jenkinsItTriggerParams = [
+            string(name: 'TRIGGER_JOB_NAME', value: jenkinsITConfig.triggerJobName),
+            string(name: 'GHPRB_TARGET_BRANCH', value: ghprbTargetBranch),
+            string(name: 'GHPRB_ACTUAL_COMMIT', value: ghprbActualCommit),
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
+    ]
+    triggerTask("atom-jenkins-it-trigger",jenkinsItTriggerParams)
 }
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
