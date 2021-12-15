@@ -25,7 +25,6 @@ properties([
 
 def nodeLabel = "${GO1160_BUILD_SLAVE}"
 def containerLabel = "golang"
-def target = params.BINARY_NAME
 
 // download binarys
 binarys = params.INPUT_BINARYS.split(",")
@@ -38,10 +37,10 @@ def download() {
 def packageBinary() {
     
     sh """
-    rm -rf ${target}
-    cp bin/${target} ${target}
-    tar -czvf ${target}.tar.gz ${target}
-    curl -F ${OUTPUT_BINARY}=@${target}.tar.gz ${FILE_SERVER_URL}/upload
+    rm -rf ${BINARY_NAME}
+    cp bin/${BINARY_NAME} ${BINARY_NAME}
+    tar -czvf ${BINARY_NAME}.tar.gz ${BINARY_NAME}
+    curl -F ${PATCH_PATH}=@${BINARY_NAME}.tar.gz ${FILE_SERVER_URL}/upload
     """
 }
 
