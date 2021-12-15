@@ -23,7 +23,7 @@ properties([
         ])
 ])
 
-def nodeLabel = goBuildPod
+def nodeLabel = "${GO1160_BUILD_SLAVE}"
 def containerLabel = "golang"
 def TARGET = params.BINARY_NAME
 
