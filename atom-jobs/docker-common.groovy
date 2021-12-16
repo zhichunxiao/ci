@@ -98,6 +98,14 @@ cp /usr/local/go/lib/time/zoneinfo.zip ./
 docker build  -t ${imagePlaceHolder} .
 """
 
+buildImgagesh["tidb"] = """
+cp /usr/local/go/lib/time/zoneinfo.zip ./
+rm -rf tidb-server
+cp bin/* ./
+curl -o Dockerfile ${DOCKERFILE}
+docker build  -t ${imagePlaceHolder} .
+"""
+
 
 
 def build_image() {
