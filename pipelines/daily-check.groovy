@@ -96,7 +96,7 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
             case "jenkins-it-trigger":
                 def jenkinsITConfig = common.parseJenkinsITConfig(task)
                 jobs[taskName] = {
-                    def result = common.jenkinsIT(jenkinsITConfig,ghprbTargetBranch,ghprbActualCommit,"daily")
+                    def result = common.jenkinsIT(jenkinsITConfig,ghprbTargetBranch,ghprbActualCommit,taskName,"daily")
                     task_result_array << ["name": taskName, "type": taskType, "result": result]
                     if (result.getResult() != "SUCCESS") {
                         throw new Exception("${taskName} failed")

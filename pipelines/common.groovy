@@ -251,7 +251,7 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
 }
 
 
-def jenkinsItTrigger(jenkinsITConfig,taskName,ghprbTargetBranch,ghprbActualCommit,triggerEvent) {
+def jenkinsItTrigger(jenkinsITConfig,ghprbTargetBranch,ghprbActualCommit,taskName,triggerEvent) {
     jenkinsItTriggerParams = [
             string(name: 'TRIGGER_JOB_NAME', value: jenkinsITConfig.triggerJobName),
             string(name: 'GHPRB_TARGET_BRANCH', value: ghprbTargetBranch),
