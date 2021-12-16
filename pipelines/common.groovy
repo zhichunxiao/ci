@@ -159,7 +159,7 @@ def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
         string(name: 'COMMIT_ID', value: commitID),
         text(name: 'BUILD_CMD', value: buildConfig.shellScript),
-        string(name: 'BUILD_ENV', value: "hub-new.pingcap.net/jenkins/centos7_golang-1.16"),
+        string(name: 'BUILD_ENV', value: buildConfig.env.image),
         string(name: 'OUTPUT_DIR', value: "bin"),
         string(name: 'BRANCH', value: branch),
         string(name: 'TASK_NAME', value: taskName),

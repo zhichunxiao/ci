@@ -21,7 +21,7 @@ properties([
             trim: true
         ),
         string(
-            defaultValue: 'hub-new.pingcap.net/jenkins/centos7_golang-1.16',
+            defaultValue: 'hub.pingcap.net/jenkins/centos7_golang-1.16:latest',
             name: 'BUILD_ENV',
             trim: true,
         ),
@@ -52,7 +52,6 @@ def run_with_pod(Closure body) {
     def label = "atom-build-atom-job" + UUID.randomUUID().toString()
     def cloud = "kubernetes"
     def namespace = "jenkins-tidb"
-    def pod_go_docker_image = 'hub-new.pingcap.net/jenkins/centos7_golang-1.16'
     def jnlp_docker_image = "jenkins/inbound-agent:4.3-4"
     podTemplate(label: label,
             cloud: cloud,
@@ -60,8 +59,8 @@ def run_with_pod(Closure body) {
             idleMinutes: 0,
             containers: [
                     containerTemplate(
-                            name: 'golang', alwaysPullImage: false,
-                            image: "${pod_go_docker_image}", ttyEnabled: true,
+                            name: 'build', alwaysPullImage: true,
+                            image: BUILD_ENV, ttyEnabled: true,
                             resourceRequestCpu: '2000m', resourceRequestMemory: '2Gi',
                             resourceLimitCpu: '4000m', resourceLimitMemory: "4Gi",
                             command: '/bin/sh -c', args: 'cat',
@@ -90,7 +89,7 @@ def run_with_pod(Closure body) {
 
 try {
     run_with_pod {
-        container("golang") {
+        container("build") {
             def ws = pwd()
             stage("${TASK_NAME}") {
                 println "${TASK_NAME}"
