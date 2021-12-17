@@ -51,6 +51,9 @@ def release_one(repo,failpoint) {
     if (repo == "br" && GIT_BRANCH.startsWith("release-") && GIT_BRANCH >= "release-5.2") {
         actualRepo = "tidb"
     }
+    if (repo == "ticdc") {
+        actualRepo = "tiflow"
+    }
     def sha1 =  get_sha(actualRepo)
     def binary = "builds/pingcap/${repo}/test/${GIT_BRANCH}/${sha1}/linux-amd64/${repo}.tar.gz"
     if (failpoint) {

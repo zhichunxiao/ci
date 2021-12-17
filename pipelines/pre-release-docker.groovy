@@ -53,6 +53,9 @@ def release_one(repo,arch,failpoint) {
     if (repo == "dumpling" && RELEASE_TAG >= "v5.3.0") {
         actualRepo = "tidb"
     }
+    if (repo == "ticdc") {
+        actualRepo = "tiflow"
+    }
     def sha1 = get_sha(actualRepo,RELEASE_BRANCH)
     if (TIKV_BUMPVERION_HASH.length() > 1 && repo == "tikv") {
         sha1 = TIKV_BUMPVERION_HASH
