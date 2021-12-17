@@ -31,7 +31,6 @@ class UnitTestConfig {
 
 class jenkinsITConfig {
     String triggerJobName;
-    SecretVar[] secretVars;
 }
 
 class LintConfig {
@@ -99,7 +98,6 @@ def parseUnitTestConfig(config) {
 def parseJenkinsITConfig(config) {
     def jenkinsITConfig = new jenkinsITConfig()
     jenkinsITConfig.triggerJobName = config.name.toString()
-    jenkinsITConfig.secretVars = parseSecretVars(config.secretVar)
     return jenkinsITConfig
 }
 
