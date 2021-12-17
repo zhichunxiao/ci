@@ -257,6 +257,8 @@ def jenkinsItTrigger(jenkinsITConfig,ghprbTargetBranch,ghprbActualCommit,taskNam
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
+    // DEBUG
+    println "${jenkinsItTriggerParams}"
     triggerTask("atom-jenkins-it-trigger",jenkinsItTriggerParams)
 }
 
