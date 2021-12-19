@@ -52,7 +52,6 @@ class CommonConfig {
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
-    sh "cat config.yaml"
     configs = readYaml (file: "config.yaml")
     return configs
 }
@@ -97,7 +96,7 @@ def parseBuildConfig(config) {
         "request": ["cpu": "4", "memory": "8Gi"]
         ]
     }
-    println "debug image: ${buildConfig.env.image}"
+    println "build env image: ${buildConfig.env.image}"
     return buildConfig
 }
 
@@ -186,8 +185,7 @@ def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'TASK_NAME', value: taskName),
         string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
-    // triggerTask("atom-build",buildParams)
-    triggerTask("debug-atom-build",buildParams)
+    triggerTask("atom-build",buildParams)
 }
 
 def codeLint(lintConfig,repo, commitID,branch,taskName,triggerEvent) {
