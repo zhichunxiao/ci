@@ -59,6 +59,17 @@ def getConfig(fileURL) {
 def parseBuildEnv(buildEnv) {
     env = new Env()
     env.image = buildEnv.image.toString()
+    if (buildEnv.request != null) {
+        env.request = new Resource()
+        env.request.cpu = buildEnv.request.cpu.toString()
+        env.request.memory = buildEnv.request.mem.toString()
+    }
+    if (buildEnv.limit != null) {
+        env.limit = new Resource()
+        env.limit.cpu = buildEnv.limit.cpu.toString()
+        env.limit.memory = buildEnv.limit.mem.toString()
+    }
+    println "env: ${env}"
     return env
 }
 
@@ -78,6 +89,16 @@ def parseBuildConfig(config) {
     def buildConfig = new BuildConfig()
     buildConfig.outputDir = config.outputDir.toString()
     buildConfig.shellScript = config.shellScript.toString()
+    if (config.buildEnv != null) {
+        buildConfig.env = parseBuildEnv(config.buildEnv)
+    } else {
+        buildConfig.env = ["image": "hub.pingcap.net/jenkins/centos7_golang-1.16:latest",
+        "limit": ["cpu": "4", "memory": "8Gi"],
+        "request": ["cpu": "4", "memory": "8Gi"]]
+        ]
+    }
+
+    println "buildConfig: ${buildConfig}"
     return buildConfig
 }
 
@@ -154,6 +175,7 @@ def cacheCode(repo,commitID,branch,prID) {
 
 def buildBinary(buildConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
+    println "buildConfig.env.image: ${buildConfig.env.image}"
     buildParams = [
         string(name: 'REPO', value: repo),
         string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
