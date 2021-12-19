@@ -52,6 +52,7 @@ class CommonConfig {
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
+    sh "cat config.yaml"
     configs = readYaml (file: "config.yaml")
     return configs
 }
