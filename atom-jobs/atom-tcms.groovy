@@ -1,3 +1,23 @@
+properties([
+    parameters([
+        string(
+            defaultValue: 'tidb',
+            name: 'REPO',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'TASK_NAME',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'TRIGGER_EVENT',
+            trim: true
+        ),
+    ])
+])
+
 tcmsHost = "https://tcms.pingcap.net/"
 
 now = Calendar.getInstance().getTime().getTime()/1000

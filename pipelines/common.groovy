@@ -277,16 +277,18 @@ def jenkinsItTrigger(jenkinsITConfig, ghprbTargetBranch, ghprbActualCommit, task
     triggerTask("atom-jenkins-it-trigger",jenkinsItTriggerParams)
 }
 
-def tcmsTest(tcmsConfig, taskName, triggerEvent) {
+def tcmsTest(tcmsConfig, repo, taskName, triggerEvent) {
     tcmsTestParams = [
+            string(name: 'REPO', value: repo),
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-tcms",tcmsTestParams)
 }
 
-def utfTest(utfConfig, taskName, triggerEvent) {
+def utfTest(utfConfig, repo, taskName, triggerEvent) {
     utfTestParams = [
+            string(name: 'REPO', value: repo),
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]

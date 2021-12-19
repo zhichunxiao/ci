@@ -107,7 +107,7 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
             case "atom-tcms":
                 def tcmsConfig = common.parseTcmsConfig(task)
                 jobs[taskName] = {
-                    def result = common.tcmsTest(tcmsConfig,taskName,"daily")
+                    def result = common.tcmsTest(tcmsConfig,repo,taskName,"daily")
                     println "result: ${result.getResult()}"
                     task_result_array << ["name": taskName, "type": taskType, "result": result]
                     if (result.getResult() != "SUCCESS") {
@@ -118,7 +118,7 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
             case "atom-utf":
                 def utfConfig = common.parseUtfConfig(task)
                 jobs[taskName] = {
-                    def result = common.utfTest(utfConfig,taskName,"daily")
+                    def result = common.utfTest(utfConfig,repo,taskName,"daily")
                     println "result: ${result.getResult()}"
                     task_result_array << ["name": taskName, "type": taskType, "result": result]
                     if (result.getResult() != "SUCCESS") {

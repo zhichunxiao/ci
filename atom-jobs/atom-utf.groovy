@@ -1,3 +1,23 @@
+properties([
+    parameters([
+        string(
+            defaultValue: 'tidb',
+            name: 'REPO',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'TASK_NAME',
+            trim: true
+        ),
+        string(
+            defaultValue: '',
+            name: 'TRIGGER_EVENT',
+            trim: true
+        ),
+    ])
+])
+
 utfHost = "http://172.16.4.180:31080/"
 
 triggerCI = httpRequest url: utfHost + "dailyci/trigger", httpMode: 'POST'
