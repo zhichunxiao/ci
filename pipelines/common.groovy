@@ -53,6 +53,14 @@ class CommonConfig {
     SecretVar[] secretVars;
 }
 
+Class TcmsConfig {
+
+}
+
+Class UtfConfig {
+
+}
+
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
@@ -127,6 +135,16 @@ def parseCommonConfig(config) {
     commonConfig.env = parseBuildEnv(config.buildEnv)
     commonConfig.secretVars = parseSecretVars(config.secretVar)
     return commonConfig
+}
+
+def parseTcmsConfig(config) {
+    def tcmsConfig = new TcmsConfig()
+    return tcmsConfig
+}
+
+def parseUtfConfig(config) {
+    def utfConfig = new UtfConfig()
+    return utfConfig
 }
 
 
@@ -248,7 +266,6 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
     triggerTask("atom-cyclo",cycloParams)
 }
 
-
 def jenkinsItTrigger(jenkinsITConfig, ghprbTargetBranch, ghprbActualCommit, taskName, triggerEvent) {
     jenkinsItTriggerParams = [
             string(name: 'TRIGGER_JOB_NAME', value: jenkinsITConfig.triggerJobName),
@@ -259,6 +276,23 @@ def jenkinsItTrigger(jenkinsITConfig, ghprbTargetBranch, ghprbActualCommit, task
     ]
     triggerTask("atom-jenkins-it-trigger",jenkinsItTriggerParams)
 }
+
+def tcmsTest(tcmsConfig, taskName, triggerEvent) {
+    tcmsTestParams = [
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
+    ]
+    triggerTask("atom-tcms",tcmsTestParams)
+}
+
+def utfTest(utfConfig, taskName, triggerEvent) {
+    utfTestParams = [
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
+    ]
+    triggerTask("atom-utf",utfTestParams)
+}
+
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
