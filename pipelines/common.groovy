@@ -94,7 +94,7 @@ def parseBuildConfig(config) {
     } else {
         buildConfig.env = ["image": "hub.pingcap.net/jenkins/centos7_golang-1.16:latest",
         "limit": ["cpu": "4", "memory": "8Gi"],
-        "request": ["cpu": "4", "memory": "8Gi"]]
+        "request": ["cpu": "4", "memory": "8Gi"]
         ]
     }
 
