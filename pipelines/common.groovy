@@ -96,6 +96,7 @@ def parseBuildConfig(config) {
         "request": ["cpu": "4", "memory": "8Gi"]
         ]
     }
+    println "debug image: ${buildConfig.env.image}"
     return buildConfig
 }
 
