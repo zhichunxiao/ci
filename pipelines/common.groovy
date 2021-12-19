@@ -69,7 +69,6 @@ def parseBuildEnv(buildEnv) {
         env.limit.cpu = buildEnv.limit.cpu.toString()
         env.limit.memory = buildEnv.limit.mem.toString()
     }
-    println "env: ${env}"
     return env
 }
 
@@ -97,8 +96,6 @@ def parseBuildConfig(config) {
         "request": ["cpu": "4", "memory": "8Gi"]
         ]
     }
-
-    println "buildConfig: ${buildConfig}"
     return buildConfig
 }
 
