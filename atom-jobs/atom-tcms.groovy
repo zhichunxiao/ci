@@ -88,7 +88,7 @@ for (b in branches) {
 	                sleep(20)
 	                sh """
 	                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_tcms/tiinsight-agent-tcms.py
-	                python3 tiinsight-agent-tcms.py "tidb" ${branch} "empty" "${branch}.xml"
+	                python3 tiinsight-agent-tcms.py "${REPO}" ${branch} "empty" "${branch}.xml"
 
 	                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-utf/agent-tcms.py
                     python3 agent-utf.py ${branch} tcms.xml

@@ -77,7 +77,7 @@ run_with_pod {
             sh """
             wget -O ./utf.xml ${utfHost}dailyci?id=${id}
             wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_utf/tiinsight-agent-utf.py
-            python3 tiinsight-agent-utf.py "tidb" ${branch} "empty" utf.xml
+            python3 tiinsight-agent-utf.py "${REPO}" ${branch} "empty" utf.xml
 
             wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-utf/agent-utf.py
             python3 agent-utf.py ${branch} utf.xml
