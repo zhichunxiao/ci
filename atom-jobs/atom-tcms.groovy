@@ -15,6 +15,11 @@ properties([
             name: 'TRIGGER_EVENT',
             trim: true
         ),
+        string(
+        defaultValue: 'test_repot',
+        name: 'TEST_REPORT_DIR',
+        trim: true
+        ),
     ])
 ])
 
@@ -84,9 +89,12 @@ for (b in branches) {
 	            stage("branch: "+ branch + " daily ci result") {
 	                sh """
 	                wget -O ./${branch}.xml ${tcmsHost}api/v1/dailyci?id=${id}&branch=${branch}
+                    mkdir -p ${REPORT_DIR}
+                    cp ./${branch}.xml ${REPORT_DIR}
 	                """
 	                sleep(20)
 	                sh """
+                    cd ${REPORT_DIR}
 	                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_tcms/tiinsight-agent-tcms.py
 	                python3 tiinsight-agent-tcms.py "${REPO}" ${branch} "empty" "${branch}.xml"
 
@@ -96,7 +104,7 @@ for (b in branches) {
                     ENV_TCMS_SUMMARY = sh(script: "cat tcms_summary.info", returnStdout: true).trim()
                     println ENV_TCMS_SUMMARY
                     currentBuild.description = "${ENV_TCMS_SUMMARY}"
-	                junit testResults: "**/${branch}.xml"
+	                junit testResults: "${REPORT_DIR}/${branch}.xml"
 	            }
 	        }
 	    }  

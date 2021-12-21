@@ -54,7 +54,7 @@ class CommonConfig {
 }
 
 Class TcmsConfig {
-
+    String testReportDir; 
 }
 
 
@@ -135,6 +135,7 @@ def parseCommonConfig(config) {
 
 def parseTcmsConfig(config) {
     def tcmsConfig = new TcmsConfig()
+    tcmsConfig.testReportDir = config.testReportDir.toString()
     return tcmsConfig
 }
 
@@ -273,6 +274,7 @@ def tcmsTest(tcmsConfig, repo, taskName, triggerEvent) {
             string(name: 'REPO', value: repo),
             string(name: 'TASK_NAME', value: taskName),
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
+            string(name: 'TEST_REPORT_DIR', value: tcmsConfig.testReportDir),
     ]
     triggerTask("atom-tcms",tcmsTestParams)
 }
