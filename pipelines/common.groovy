@@ -53,7 +53,7 @@ class CommonConfig {
     SecretVar[] secretVars;
 }
 
-Class TcmsConfig {
+class TcmsConfig {
     String testReportDir; 
 }
 
