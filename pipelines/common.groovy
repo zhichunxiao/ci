@@ -53,6 +53,10 @@ class CommonConfig {
     SecretVar[] secretVars;
 }
 
+Class TcmsConfig {
+    String testReportDir; 
+}
+
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
@@ -146,6 +150,12 @@ def parseCommonConfig(config) {
     commonConfig.env = parseBuildEnv(config.buildEnv)
     commonConfig.secretVars = parseSecretVars(config.secretVar)
     return commonConfig
+}
+
+def parseTcmsConfig(config) {
+    def tcmsConfig = new TcmsConfig()
+    tcmsConfig.testReportDir = config.testReportDir.toString()
+    return tcmsConfig
 }
 
 
@@ -268,7 +278,6 @@ def codeCyclo(cycloConfig,repo,commitID,branch,taskName,triggerEvent) {
     triggerTask("atom-cyclo",cycloParams)
 }
 
-
 def jenkinsItTrigger(jenkinsITConfig, ghprbTargetBranch, ghprbActualCommit, taskName, triggerEvent) {
     jenkinsItTriggerParams = [
             string(name: 'TRIGGER_JOB_NAME', value: jenkinsITConfig.triggerJobName),
@@ -278,6 +287,16 @@ def jenkinsItTrigger(jenkinsITConfig, ghprbTargetBranch, ghprbActualCommit, task
             string(name: 'TRIGGER_EVENT', value: triggerEvent),
     ]
     triggerTask("atom-jenkins-it-trigger",jenkinsItTriggerParams)
+}
+
+def tcmsTest(tcmsConfig, repo, taskName, triggerEvent) {
+    tcmsTestParams = [
+            string(name: 'REPO', value: repo),
+            string(name: 'TASK_NAME', value: taskName),
+            string(name: 'TRIGGER_EVENT', value: triggerEvent),
+            string(name: 'TEST_REPORT_DIR', value: tcmsConfig.testReportDir),
+    ]
+    triggerTask("atom-tcms",tcmsTestParams)
 }
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {

@@ -104,6 +104,17 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
                     }
                 }
                 break
+            case "atom-tcms":
+                def tcmsConfig = common.parseTcmsConfig(task)
+                jobs[taskName] = {
+                    def result = common.tcmsTest(tcmsConfig,repo,taskName,"daily")
+                    println "result: ${result.getResult()}"
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
+                }
+                break
         }
     }
 
