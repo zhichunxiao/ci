@@ -98,8 +98,8 @@ for (b in branches) {
 	                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_tcms/tiinsight-agent-tcms.py
 	                python3 tiinsight-agent-tcms.py "${REPO}" ${branch} "empty" "${branch}.xml"
 
-	                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-utf/agent-tcms.py
-                    python3 agent-utf.py ${branch} tcms.xml
+	                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-tcms/agent-tcms.py
+                    python3 agent-tcms.py ${branch} tcms.xml
                     """
                     ENV_TCMS_SUMMARY = sh(script: "cat tcms_summary.info", returnStdout: true).trim()
                     println ENV_TCMS_SUMMARY
