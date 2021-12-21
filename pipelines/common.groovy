@@ -57,10 +57,6 @@ Class TcmsConfig {
 
 }
 
-Class UtfConfig {
-
-}
-
 
 def getConfig(fileURL) {
     sh "wget -qnc ${fileURL} -O config.yaml"
@@ -140,11 +136,6 @@ def parseCommonConfig(config) {
 def parseTcmsConfig(config) {
     def tcmsConfig = new TcmsConfig()
     return tcmsConfig
-}
-
-def parseUtfConfig(config) {
-    def utfConfig = new UtfConfig()
-    return utfConfig
 }
 
 
@@ -285,16 +276,6 @@ def tcmsTest(tcmsConfig, repo, taskName, triggerEvent) {
     ]
     triggerTask("atom-tcms",tcmsTestParams)
 }
-
-def utfTest(utfConfig, repo, taskName, triggerEvent) {
-    utfTestParams = [
-            string(name: 'REPO', value: repo),
-            string(name: 'TASK_NAME', value: taskName),
-            string(name: 'TRIGGER_EVENT', value: triggerEvent),
-    ]
-    triggerTask("atom-utf",utfTestParams)
-}
-
 
 def codeCommon(commonConfig,repo,commitID,branch,taskName,triggerEvent) {
     def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
