@@ -76,7 +76,7 @@ def run_with_pod(Closure body) {
                     containerTemplate(
                             name: 'golang', alwaysPullImage: true,
                             image: "${pod_go_docker_image}", ttyEnabled: true,
-                            resourceRequestCpu: '8000m', resourceRequestMemory: '8Gi',
+                            resourceRequestCpu: '1000m', resourceRequestMemory: '2Gi',
                             resourceLimitCpu: '20000m', resourceLimitMemory: "20Gi",
                             command: '/bin/sh -c', args: 'cat',
                             // envVars: [containerEnvVar(key: 'GOMODCACHE', value: '/nfs/cache/mod'),
