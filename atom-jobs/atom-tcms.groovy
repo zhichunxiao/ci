@@ -62,7 +62,7 @@ def run_with_pod(Closure body) {
                             image: "${pod_go_docker_image}", ttyEnabled: true,
                             resourceRequestCpu: '100m', resourceRequestMemory: '256Mi',
                             command: '/bin/sh -c', args: 'cat',
-                            envVars: [ontainerEnvVar(key: 'GOPATH', value: '/go')],
+                            envVars: [containerEnvVar(key: 'GOPATH', value: '/go')],
                             
                     )
             ],
