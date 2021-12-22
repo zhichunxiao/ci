@@ -171,7 +171,7 @@ node("${GO1160_BUILD_SLAVE}") {
             branch: "master",
             repo: repo,
             org: org,
-            url: "${env.RUN_DISPLAY_URL}", 
+            url: RUN_DISPLAY_URL, 
             startTime: taskStartTimeInMillis, 
             duration: System.currentTimeMillis() - taskStartTimeInMillis,
             trigger: "daily"            
