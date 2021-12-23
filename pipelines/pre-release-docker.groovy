@@ -202,12 +202,12 @@ stage ("release") {
                 }
             }
 
-            for (item in releaseRepos) {
-                def product = "${item}"
-                builds["build ${item} arm64"] = {
-                    release_one(product,"arm64",false)
-                }
-            }
+//             for (item in releaseRepos) {
+//                 def product = "${item}"
+//                 builds["build ${item} arm64"] = {
+//                     release_one(product,"arm64",false)
+//                 }
+//             }
 
             failpointRepos = ["tidb","pd","tikv"]
             for (item in failpointRepos) {
