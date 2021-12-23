@@ -76,12 +76,18 @@ def parseBuildResult(list) {
     }
     total_test = success_test + failed_test
 
-    return [
-        "total_test": total_test, 
-        "success_test": success_test, 
-        "failed_test": failed_test
-    ]
-        
+    println "total_test: ${total_test}"
+    println "success_test: ${success_test}"
+    println "failed_test: ${failed_test}"
+
+    def resp_str = ""
+    if (failed_test > 0) {
+        resp_str = "failed ${failed_test}, success ${success_test}, total ${total_test}"
+    } else {
+        resp_str = "all ${total_test} tests passed"
+    }
+
+    return resp_str      
 }
 
 run_with_pod {
@@ -104,39 +110,25 @@ run_with_pod {
                         string(name: 'release_test__tidb_commit', value: GHPRB_ACTUAL_COMMIT),
                 ]
                 dir("${ws}/${TRIGGER_JOB_NAME}") {
-                       result = build(job: "${TRIGGER_JOB_NAME}", parameters: default_params, wait: true)
+                       result = build(job: "${TRIGGER_JOB_NAME}", parameters: default_params, wait: true, propagate: false)
                        buildResultInStr = result.getDescription()
                        if (result.getResult() != "SUCCESS") {
                            currentBuild.result = "FAILURE"
                        }
                        if (result.getDescription() != null && result.getDescription() != "") {
-                            resultStrValid = true
                             println result.getDescription()
                             def jsonObj = readJSON text: result.getDescription()
                             sh """
                             echo ${jsonObj}[0].status
                             """
-                            summary = parseBuildResult(jsonObj)
+                            summary_info = parseBuildResult(jsonObj)
+                            currentBuild.description = summary_info
                        }
-                }
-            }
-
-            stage("Summary") {
-                if ( resultStrValid ) {
-                    println "total_test: ${summary["total_test"]}"
-                    println "success_test: ${summary["success_test"]}"
-                    println "failed_test: ${summary["failed_test"]}"
-                    currentBuild.description = "total_test: ${summary.total_test}, success_test: ${summary.success_test}, failed_test: ${summary.failed_test}"
-                } else {
-                    println "No result string"
                 }
             }
         }  
         catch (err) {
             throw err
-        } finally {
-            sh """
-            """
         }
     }
 }
