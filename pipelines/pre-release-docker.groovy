@@ -150,7 +150,7 @@ def release_one(repo,arch,failpoint) {
     
 
     if (repo == "br") {
-        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-${arch}/lightning"
+        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-${arch}/tidb-lightning"
         imageName = "tidb-lightning"
         if (arch == "arm64") {
             imageName = imageName + "-arm64"
@@ -171,7 +171,7 @@ def release_one(repo,arch,failpoint) {
                 parameters: paramsDockerLightning
 
         if (NEED_DEBUG_IMAGE && arch == "amd64") {
-            def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
+            def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/tidb-lightning"
             def imageLightlingForDebug = "hub.pingcap.net/qa/tidb-lightning:${IMAGE_TAG}-debug"
             def paramsDockerLightningForDebug = [
                 string(name: "ARCH", value: "amd64"),
