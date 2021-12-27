@@ -99,7 +99,7 @@ for (b in branches) {
 	                python3 tiinsight-agent-tcms.py "${REPO}" ${branch} "empty" "${branch}.xml"
 
                     wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-tcms/agent-tcms.py
-                    python3 agent-tcms.py ${branch} tcms.xml ${env.BUILD_URL}
+                    python3 agent-tcms.py ${branch} tcms.xml ${BUILD_URL}
                     """
                     ENV_TCMS_SUMMARY = sh(script: "cat tcms_summary.info", returnStdout: true).trim()
                     println ENV_TCMS_SUMMARY

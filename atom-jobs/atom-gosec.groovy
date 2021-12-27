@@ -131,7 +131,7 @@ try {
 
                 sh """
                     wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_gosec/tiinsight-agent-gosec.py
-                    python3 tiinsight-agent-gosec.py ${REPO} ${BRANCH} ${COMMIT_ID} ${REPO}/results.xml ${env.BUILD_URL}
+                    python3 tiinsight-agent-gosec.py ${REPO} ${BRANCH} ${COMMIT_ID} ${REPO}/results.xml ${BUILD_URL}
                 """
 
                 junit(

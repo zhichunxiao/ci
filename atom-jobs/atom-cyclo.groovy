@@ -130,7 +130,7 @@ try {
                 """
                 sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-cyclo/agent-cyclo.py
-                python3 agent-cyclo.py ${REPO}/repo_cyclo.log ${env.BUILD_URL}
+                python3 agent-cyclo.py ${REPO}/repo_cyclo.log ${BUILD_URL}
                 """
                 ENV_CYCLO_SUMMARY = sh(script: "cat cyclo_summary.info", returnStdout: true).trim()
                 println ENV_CYCLO_SUMMARY
