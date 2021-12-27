@@ -152,7 +152,7 @@ try {
             } finally {
                 sh """
                 wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_lint/tiinsight-agent-lint.py
-                python3 tiinsight-agent-lint.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${REPO}/${REPORT_DIR}
+                python3 tiinsight-agent-lint.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${REPO}/${REPORT_DIR} ${BUILD_URL}
                 """
                 junit(
                     allowEmptyResults: true,
