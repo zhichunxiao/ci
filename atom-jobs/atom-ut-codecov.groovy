@@ -6,18 +6,17 @@ properties([
             trim: true
         ),
         string(
-            defaultValue: 'http://fileserver.pingcap.net/download/builds/pingcap/devops/cachecode/tiem/36c442509f86d58a69004059ba0ac3b74e4e4051/tiem.tar.gz',
+            defaultValue: '',
             name: 'CACHE_CODE_FILESERVER_URL',
             trim: true
         ),
         string(
-            defaultValue: '36c442509f86d58a69004059ba0ac3b74e4e4051',
+            defaultValue: '',
             name: 'COMMIT_ID',
             trim: true,
         ),
         text(
             defaultValue: """
-go test -v ./... -coverprofile=cover.out | go-junit-report > test.xml
             """,
             name: 'TEST_CMD',
             trim: true
@@ -30,6 +29,11 @@ go test -v ./... -coverprofile=cover.out | go-junit-report > test.xml
         string(
             defaultValue: 'test_report',
             name: 'UT_REPORT_DIR',
+            trim: true,
+        ),
+        string(
+            defaultValue: 'coverage_report',
+            name: 'COVERAGE_REPORT_DIR',
             trim: true,
         ),
         string(
@@ -101,6 +105,8 @@ def run_with_pod(Closure body) {
 }
 
 
+lines_coverage_rate = ""
+
 run_with_pod {
     container("golang") {
         try {
@@ -127,14 +133,7 @@ run_with_pod {
 
             stage("Test") {
                 dir("${ws}/${REPO}") {
-                    sh '''
-                        go get github.com/jstemmer/go-junit-report
-                        go get github.com/axw/gocov/gocov
-                        go get github.com/AlekSi/gocov-xml
-                    '''
-                    withCredentials(credentialList) {
-                        sh TEST_CMD
-                    }
+                    sh TEST_CMD
                 }
             }
 
@@ -149,15 +148,39 @@ run_with_pod {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f   -t ${CODECOV_TOKEN} -C ${ghprbActualCommit} -P ${ghprbPullId} -b ${BUILD_NUMBER}
+                                ./codecov -f 'coverage_report/*.coverage'  -t ${CODECOV_TOKEN} -C ${ghprbActualCommit} -P ${ghprbPullId} -b ${BUILD_NUMBER}
                                 """
                             } else {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f  -t ${CODECOV_TOKEN} -C ${ghprbActualCommit} -b ${BUILD_NUMBER} -B ${ghprbTargetBranch}
+                                ./codecov -f 'coverage_report/*.coverage' -t ${CODECOV_TOKEN} -C ${ghprbActualCommit} -b ${BUILD_NUMBER} -B ${ghprbTargetBranch}
                                 """
                             }
+                        }
+                        sleep(time:10,unit:"SECONDS")
+                        def response = httpRequest Authorization: CODECOV_API_TOKEN, url: "https://codecov.io/api/gh/pingcap/tidb/commit/${ghprbActualCommit}"
+                        println('Status: '+response.status)
+                        def obj = readJSON text:response.content
+                        if (response.status == 200) {
+                            println(obj.commit.totals)
+                            lines_coverage_rate = "Lines coverage ${obj.commit.totals.c.toFloat().round(2)}%."
+                            println('Coverage: '+obj.commit.totals.c)
+                            println("Files count: "+ obj.commit.totals.f)
+                            println("Lines count: "+obj.commit.totals.n)
+                            println("Hits count: "+obj.commit.totals.h)
+                            println("Misses count: "+obj.commit.totals.m)
+                            println("Paritials count: "+obj.commit.totals.p)
+
+                            println('Coverage: '+obj.commit.totals.diff[5])
+                            println("Files count: "+ obj.commit.totals.diff[0])
+                            println("Lines count: "+obj.commit.totals.diff[1])
+                            println("Hits count: "+obj.commit.totals.diff[2])
+                            println("Misses count: "+obj.commit.totals.diff[3])
+                            println("Paritials count: "+obj.commit.totals.diff[4])
+                        } else {
+                            println('Error: '+response.content)
+                            println('Status not 200: '+response.status)
                         }
                     }
                 }
@@ -169,7 +192,7 @@ run_with_pod {
         } finally {
             sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
-                python3 agent-ut.py ${REPO}/${UT_REPORT_DIR} ${REPO}/${COV_REPORT_DIR} ${COVERAGE_RATE}
+                python3 agent-ut.py ${REPO}/${UT_REPORT_DIR}
                 
                 wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_ut/tiinsight-agent-ut.py
                 python3 tiinsight-agent-ut.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${REPO}/${COV_REPORT_DIR} ${REPO}/${UT_REPORT_DIR}
@@ -177,14 +200,14 @@ run_with_pod {
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
             currentBuild.description = "${ENV_TEST_SUMMARY}"
+            if (lines_coverage_rate != "") {
+                currentBuild.description = currentBuild.description + lines_coverage_rate
+            }
 
             junit testResults: "${REPO}/${UT_REPORT_DIR}"
             if (currentBuild.result == 'UNSTABLE') {
                 currentBuild.result = 'FAILURE'
             }
-            echo currentBuild.result
-            cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: "${REPO}/${COV_REPORT_DIR}", lineCoverageTargets: "${COVERAGE_RATE}, ${COVERAGE_RATE}, ${COVERAGE_RATE}", maxNumberOfBuilds: 10, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false
-            echo currentBuild.result
         }
     }
 }

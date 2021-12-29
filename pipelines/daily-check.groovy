@@ -115,6 +115,17 @@ def runtasks(branch,repo,commitID,tasks,common,task_result_array) {
                     }
                 }
                 break
+            case "atom-ut-codecov":
+                def utCodecovConfig = common.parseUnitTestCodecovConfig(task)
+                jobs[taskName] = {
+                    def result = common.unitTestCodecov(utCodecovConfig,repo,commitID,branch,taskName,"daily")
+                    println "result: ${result.getResult()}"
+                    task_result_array << ["name": taskName, "type": taskType, "result": result]
+                    if (result.getResult() != "SUCCESS") {
+                        throw new Exception("${taskName} failed")
+                    }
+                }
+                break
         }
     }
 
