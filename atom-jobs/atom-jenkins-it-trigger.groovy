@@ -120,6 +120,10 @@ run_with_pod {
                             def jsonObj = readJSON text: result.getDescription()
                             writeJSON file: 'result.json', json: jsonObj, pretty: 4
                             sh 'cat result.json'
+                            sh """
+                            wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_daily_it/tiinsights-agent-daily-it.py
+                            python3 tiinsights-agent-daily-it.py ${TRIGGER_EVENT} ${TRIGGER_JOB_NAME} ${GHPRB_ACTUAL_COMMIT} ${GHPRB_TARGET_BRANCH} "result.json"
+                            """
                             archiveArtifacts artifacts: 'result.json', fingerprint: true
                             summary_info = parseBuildResult(jsonObj)
                             currentBuild.description = summary_info
