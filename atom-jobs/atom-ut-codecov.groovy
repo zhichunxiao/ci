@@ -194,8 +194,6 @@ run_with_pod {
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
                 python3 agent-ut.py ${REPO}/${UT_REPORT_DIR}
                 
-                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_ut/tiinsight-agent-ut.py
-                python3 tiinsight-agent-ut.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${REPO}/${COV_REPORT_DIR} ${REPO}/${UT_REPORT_DIR}
             """
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
