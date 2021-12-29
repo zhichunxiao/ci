@@ -118,9 +118,9 @@ run_with_pod {
                        if (result.getDescription() != null && result.getDescription() != "") {
                             println result.getDescription()
                             def jsonObj = readJSON text: result.getDescription()
-                            sh """
-                            echo ${jsonObj}[0].status
-                            """
+                            writeJSON file: 'result.json', json: jsonObj, pretty: 4
+                            sh 'cat result.json'
+                            archiveArtifacts artifacts: 'result.json', fingerprint: true
                             summary_info = parseBuildResult(jsonObj)
                             currentBuild.description = summary_info
                        }
