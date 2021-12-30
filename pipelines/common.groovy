@@ -31,8 +31,8 @@ class UnitTestConfig {
 
 class UnitTestCodecovConfig {
     String shellScript;
-    String utReportDir;
-    String covReportDir;
+    String utReport;
+    String covReport;
     String coverageRate;
     SecretVar[] secretVars;
     Env env;
@@ -130,8 +130,8 @@ def parseUnitTestConfig(config) {
 
 def parseUnitTestCodecovConfig(config) {
     def unitTestCodecovConfig = new UnitTestCodecovConfig()
-    unitTestCodecovConfig.utReportDir = config.utReportDir.toString()
-    unitTestCodecovConfig.covReportDir = config.covReportDir.toString()
+    unitTestCodecovConfig.utReport = config.utReport.toString()
+    unitTestCodecovConfig.covReport = config.covReport.toString()
     unitTestCodecovConfig.shellScript = config.shellScript.toString()
     unitTestCodecovConfig.coverageRate = config.coverageRate.toString()
     unitTestCodecovConfig.secretVars = parseSecretVars(config.secretVar)
@@ -283,8 +283,8 @@ def unitTestCodecov(unitTestCodecovConfig,repo,commitID,branch,taskName,triggerE
         string(name: 'COMMIT_ID', value: commitID),
         string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
         text(name: 'TEST_CMD', value: shellScript),
-        string(name: 'UT_REPORT_DIR', value: unitTestCodecovConfig.utReportDir),
-        string(name: 'COV_REPORT_DIR', value: unitTestCodecovConfig.covReportDir),
+        string(name: 'UT_REPORT', value: unitTestCodecovConfig.utReport),
+        string(name: 'COVERAGE_REPORT', value: unitTestCodecovConfig.covReport),
         string(name: 'COVERAGE_RATE', value: unitTestCodecovConfig.coverageRate),
         string(name: 'TEST_ENV', value: "hub.pingcap.net/jenkins/centos7_golang-1.16"),
         string(name: 'BRANCH', value: branch),

@@ -26,13 +26,13 @@ properties([
             trim: true,
         ),
         string(
-            defaultValue: 'test_report',
-            name: 'UT_REPORT_DIR',
+            defaultValue: 'test_report/*.xml',
+            name: 'UT_REPORT',
             trim: true,
         ),
         string(
-            defaultValue: 'coverage_report',
-            name: 'COVERAGE_REPORT_DIR',
+            defaultValue: 'coverage_report/*.coverage',
+            name: 'COVERAGE_REPORT',
             trim: true,
         ),
         string(
@@ -150,13 +150,13 @@ run_with_pod {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f "${COVERAGE_REPORT_DIR}/*.coverage"  -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -P ${PULL_REQUEST_ID} -b ${BUILD_NUMBER}
+                                ./codecov -f "${COVERAGE_REPORT}"  -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -P ${PULL_REQUEST_ID} -b ${BUILD_NUMBER}
                                 """
                             } else {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f "${COVERAGE_REPORT_DIR}/*.coverage" -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -b ${BUILD_NUMBER} -B ${BRANCH}
+                                ./codecov -f "${COVERAGE_REPORT}" -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -b ${BUILD_NUMBER} -B ${BRANCH}
                                 """
                             }
                         }
@@ -196,7 +196,7 @@ run_with_pod {
         } finally {
             sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut-codecov.py
-                python3 agent-ut-codecov.py ${REPO}/${UT_REPORT_DIR} || true
+                python3 agent-ut-codecov.py \"${REPO}/${UT_REPORT}\" || true
             """
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
@@ -206,7 +206,7 @@ run_with_pod {
             }
             println currentBuild.description
 
-            junit testResults: "${REPO}/${UT_REPORT_DIR}/**/*.xml"
+            junit testResults: "${REPO}/${UT_REPORT}"
             if (currentBuild.result == 'UNSTABLE') {
                 currentBuild.result = 'FAILURE'
             }
