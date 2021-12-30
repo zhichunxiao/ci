@@ -105,6 +105,7 @@ def run_with_pod(Closure body) {
 
 
 lines_coverage_rate = ""
+lines_coverage_message = ""
 
 run_with_pod {
     container("golang") {
@@ -166,7 +167,8 @@ run_with_pod {
                         def obj = readJSON text:response.content
                         if (response.status == 200) {
                             println(obj.commit.totals)
-                            lines_coverage_rate = "Lines coverage ${obj.commit.totals.c.toFloat().round(2)}%."
+                            lines_coverage_message = "Lines coverage ${obj.commit.totals.c.toFloat().round(2)}%."
+                            lines_coverage_rate = obj.commit.totals.c
                             println('Coverage: '+obj.commit.totals.c)
                             println("Files count: "+ obj.commit.totals.f)
                             println("Lines count: "+obj.commit.totals.n)
@@ -201,8 +203,8 @@ run_with_pod {
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
             currentBuild.description = "${ENV_TEST_SUMMARY}"
-            if (lines_coverage_rate != "") {
-                currentBuild.description = currentBuild.description + lines_coverage_rate
+            if (lines_coverage_message != "") {
+                currentBuild.description = currentBuild.description + lines_coverage_message
             }
             println currentBuild.description
 
