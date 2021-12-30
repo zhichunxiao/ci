@@ -204,7 +204,7 @@ run_with_pod {
             }
             println currentBuild.description
 
-            junit testResults: "${REPO}/${UT_REPORT_DIR}"
+            junit testResults: "${REPO}/${UT_REPORT_DIR}/**/*.xml"
             if (currentBuild.result == 'UNSTABLE') {
                 currentBuild.result = 'FAILURE'
             }
