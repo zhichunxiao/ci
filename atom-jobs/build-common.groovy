@@ -160,7 +160,7 @@ if (params.PRODUCT == "tics") {
     nodeLabel = "build_tiflash"
     containerLabel = "tiflash"
 } 
-if (params.ARCH == "arm64") {
+if (params.ARCH == "arm64" && params.OS == "linux") {
     binPath = "/usr/local/node/bin:/root/.cargo/bin:/usr/lib64/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:${GO_BIN_PATH}"
     nodeLabel = "arm"
     containerLabel = ""
@@ -169,9 +169,15 @@ if (params.ARCH == "arm64") {
         containerLabel = "tiflash"
     }
 }
-if (params.OS == "darwin") {
+if (params.OS == "darwin" && params.ARCH == "amd64") {
     binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}"
     nodeLabel = "mac"
+    containerLabel = ""
+}
+
+if (params.OS == "darwin" && params.ARCH == "arm64") {
+    binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}"
+    nodeLabel = "mac-arm"
     containerLabel = ""
 }
 
