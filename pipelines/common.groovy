@@ -29,6 +29,16 @@ class UnitTestConfig {
     Env env;
 }
 
+class UnitTestCodecovConfig {
+    String shellScript;
+    String utReport;
+    String covReport;
+    String coverageRate;
+    SecretVar[] secretVars;
+    Env env;
+}
+
+
 class jenkinsITConfig {
     String triggerJobName;
 }
@@ -116,6 +126,16 @@ def parseUnitTestConfig(config) {
     unitTestConfig.coverageRate = config.coverageRate.toString()
     unitTestConfig.secretVars = parseSecretVars(config.secretVar)
     return unitTestConfig
+}
+
+def parseUnitTestCodecovConfig(config) {
+    def unitTestCodecovConfig = new UnitTestCodecovConfig()
+    unitTestCodecovConfig.utReport = config.utReport.toString()
+    unitTestCodecovConfig.covReport = config.covReport.toString()
+    unitTestCodecovConfig.shellScript = config.shellScript.toString()
+    unitTestCodecovConfig.coverageRate = config.coverageRate.toString()
+    unitTestCodecovConfig.secretVars = parseSecretVars(config.secretVar)
+    return unitTestCodecovConfig
 }
 
 def parseJenkinsITConfig(config) {
@@ -247,6 +267,32 @@ def unitTest(unitTestConfig,repo,commitID,branch,taskName,triggerEvent) {
         string(name: 'SECRET_VARS', value: secretVarsString),
     ]
     triggerTask("atom-ut",utParams)
+}
+
+def unitTestCodecov(unitTestCodecovConfig,repo,commitID,branch,taskName,triggerEvent) {
+    def cacheCodeUrl = "${FILE_SERVER_URL}/download/builds/pingcap/devops/cachecode/${repo}/${commitID}/${repo}.tar.gz"
+    def secretVars = []
+    def shellScript = unitTestCodecovConfig.shellScript
+    for (sVar in unitTestCodecovConfig.secretVars) {
+        secretVars.push(sVar.secretID + ":" + sVar.key)
+        shellScript = shellScript.replace("\${" + sVar.key + "}" , "\$" + sVar.key) 
+    }
+    def secretVarsString = secretVars.join(",")
+    utParams = [
+        string(name: 'REPO', value: repo),
+        string(name: 'COMMIT_ID', value: commitID),
+        string(name: 'CACHE_CODE_FILESERVER_URL', value: cacheCodeUrl),
+        text(name: 'TEST_CMD', value: shellScript),
+        string(name: 'UT_REPORT', value: unitTestCodecovConfig.utReport),
+        string(name: 'COVERAGE_REPORT', value: unitTestCodecovConfig.covReport),
+        string(name: 'COVERAGE_RATE', value: unitTestCodecovConfig.coverageRate),
+        string(name: 'TEST_ENV', value: "hub.pingcap.net/jenkins/centos7_golang-1.16"),
+        string(name: 'BRANCH', value: branch),
+        string(name: 'TASK_NAME', value: taskName),
+        string(name: 'TRIGGER_EVENT', value: triggerEvent),
+        string(name: 'SECRET_VARS', value: secretVarsString),
+    ]
+    triggerTask("atom-ut-codecov",utParams)
 }
 
 def codeGosec(gosecConfig,repo,commitID,branch,taskName,triggerEvent) {
