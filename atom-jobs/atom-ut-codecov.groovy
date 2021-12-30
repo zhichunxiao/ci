@@ -132,7 +132,10 @@ run_with_pod {
 
             stage("Test") {
                 dir("${ws}/${REPO}") {
-                    sh TEST_CMD
+                    withCredentials(credentialList) { 
+                        sh TEST_CMD
+                    }
+                    
                 }
             }
 
@@ -153,7 +156,7 @@ run_with_pod {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f 'coverage_report/*.coverage' -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -b ${BUILD_NUMBER} -B ${BRANCH}
+                                ./codecov -f "${COVERAGE_REPORT_DIR}/*.coverage" -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -b ${BUILD_NUMBER} -B ${BRANCH}
                                 """
                             }
                         }
@@ -194,7 +197,6 @@ run_with_pod {
             sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut-codecov.py
                 python3 agent-ut-codecov.py ${REPO}/${UT_REPORT_DIR} || true
-                
             """
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
