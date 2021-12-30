@@ -19,7 +19,6 @@ properties([
             defaultValue: """
             """,
             name: 'TEST_CMD',
-            trim: true
         ),
         string(
             defaultValue: 'hub.pingcap.net/jenkins/centos7_golang-1.16:latest',
@@ -148,18 +147,18 @@ run_with_pod {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f 'coverage_report/*.coverage'  -t ${CODECOV_TOKEN} -C ${ghprbActualCommit} -P ${ghprbPullId} -b ${BUILD_NUMBER}
+                                ./codecov -f 'coverage_report/*.coverage'  -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -P ${PULL_REQUEST_ID} -b ${BUILD_NUMBER}
                                 """
                             } else {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f 'coverage_report/*.coverage' -t ${CODECOV_TOKEN} -C ${ghprbActualCommit} -b ${BUILD_NUMBER} -B ${ghprbTargetBranch}
+                                ./codecov -f 'coverage_report/*.coverage' -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -b ${BUILD_NUMBER} -B ${BRANCH}
                                 """
                             }
                         }
-                        sleep(time:100,unit:"SECONDS")
-                        def response = httpRequest Authorization: CODECOV_API_TOKEN, url: "https://codecov.io/api/gh/pingcap/tidb/commit/${ghprbActualCommit}"
+                        sleep(time:120,unit:"SECONDS")
+                        def response = httpRequest Authorization: CODECOV_API_TOKEN, url: "https://codecov.io/api/gh/pingcap/tidb/commit/${COMMIT_ID}"
                         println('Status: '+response.status)
                         def obj = readJSON text:response.content
                         if (response.status == 200) {
@@ -188,11 +187,13 @@ run_with_pod {
 
         }  
         catch (err) {
+            println "error found======"
+            echo "Caught: ${err}"
             throw err
         } finally {
             sh """
-                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut.py
-                python3 agent-ut.py ${REPO}/${UT_REPORT_DIR}
+                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut-codecov.py
+                python3 agent-ut-codecov.py ${REPO}/${UT_REPORT_DIR} || true
                 
             """
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
@@ -201,6 +202,7 @@ run_with_pod {
             if (lines_coverage_rate != "") {
                 currentBuild.description = currentBuild.description + lines_coverage_rate
             }
+            println currentBuild.description
 
             junit testResults: "${REPO}/${UT_REPORT_DIR}"
             if (currentBuild.result == 'UNSTABLE') {
