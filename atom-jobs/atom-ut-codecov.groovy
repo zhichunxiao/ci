@@ -150,7 +150,7 @@ run_with_pod {
                                 sh """
                                 curl -LO ${FILE_SERVER_URL}/download/cicd/ci-tools/codecov
                                 chmod +x codecov
-                                ./codecov -f 'coverage_report/*.coverage'  -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -P ${PULL_REQUEST_ID} -b ${BUILD_NUMBER}
+                                ./codecov -f "${COVERAGE_REPORT_DIR}/*.coverage"  -t ${CODECOV_TOKEN} -C ${COMMIT_ID} -P ${PULL_REQUEST_ID} -b ${BUILD_NUMBER}
                                 """
                             } else {
                                 sh """
