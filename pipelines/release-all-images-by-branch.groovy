@@ -22,6 +22,7 @@ properties([
                 H H(0-23)/4 * * * % GIT_BRANCH=release-5.1
                 H H(0-23)/4 * * * % GIT_BRANCH=release-5.2
                 H H(0-23)/4 * * * % GIT_BRANCH=release-5.3
+                H H(0-23)/4 * * * % GIT_BRANCH=release-5.4
                 H H(0-23)/4 * * * % GIT_BRANCH=master
             ''')
         ])
@@ -124,7 +125,7 @@ def release_one(repo,failpoint) {
 
 
     if (repo == "br") {
-        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/lightning"
+        def dockerfileLightning = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/linux-amd64/tidb-lightning"
         def imageLightling = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}"
         if (failpoint) {
             imageLightling = "${imageLightling}-failpoint"
@@ -143,7 +144,7 @@ def release_one(repo,failpoint) {
                 wait: true,
                 parameters: paramsDockerLightning
                 
-        def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/lightning"
+        def dockerfileLightningForDebug = "https://raw.githubusercontent.com/PingCAP-QE/ci/main/jenkins/Dockerfile/release/debug-image/tidb-lightning"
         def imageLightningForDebug = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-debug"
         if (failpoint) {
             imageLightningForDebug = "hub.pingcap.net/qa/tidb-lightning:${GIT_BRANCH}-failpoint-debug"
