@@ -193,7 +193,7 @@ def release_one(repo,arch,failpoint) {
 stage ("release") {
     node("${GO_BUILD_SLAVE}") {
         container("golang") {
-            releaseRepos = ["dumpling","br","ticdc","tidb-binlog","tics","tidb","tikv","pd","monitoring"]
+            releaseRepos = ["dumpling","br","ticdc","tidb-binlog","tics","tidb","tikv","pd","monitoring","ng-monitoring"]
             builds = [:]
             for (item in releaseRepos) {
                 def product = "${item}"
