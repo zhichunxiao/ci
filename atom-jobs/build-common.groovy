@@ -468,6 +468,9 @@ if [ ${EDITION} == 'enterprise' ]; then
     export TIKV_EDITION=Enterprise
     export ROCKSDB_SYS_SSE=0
 fi;
+if [[ ${OS} == 'darwin' ]]; then
+    export PATH=${binPath}
+fi;
 if [ ${OS} == 'linux' ]; then
     grpcio_ver=`grep -A 1 'name = "grpcio"' Cargo.lock | tail -n 1 | cut -d '"' -f 2`
     if [[ ! "0.8.0" > "\$grpcio_ver" ]]; then
