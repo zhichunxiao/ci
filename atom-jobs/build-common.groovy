@@ -170,13 +170,13 @@ if (params.ARCH == "arm64" && params.OS == "linux") {
     }
 }
 if (params.OS == "darwin" && params.ARCH == "amd64") {
-    binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}"
+    binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}:/usr/local/opt/binutils/bin/"
     nodeLabel = "mac"
     containerLabel = ""
 }
 
 if (params.OS == "darwin" && params.ARCH == "arm64") {
-    binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}"
+    binPath = "/Users/pingcap/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/pingcap/.cargo/bin:${GO_BIN_PATH}:/usr/local/opt/binutils/bin/"
     nodeLabel = "mac-arm"
     containerLabel = ""
 }
