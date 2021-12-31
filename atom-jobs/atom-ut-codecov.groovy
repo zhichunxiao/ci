@@ -199,6 +199,9 @@ run_with_pod {
             sh """
                 wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-ut/agent-ut-codecov.py
                 python3 agent-ut-codecov.py \"${REPO}/${UT_REPORT}\" || true
+
+                wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_ut_codecov/tiinsights-agent-ut-codecov.py
+                python3 tiinsights-agent-ut-codecov.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${UT_REPORT} ${lines_coverage_rate} ${BUILD_URL}
             """
             ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
             println ENV_TEST_SUMMARY
