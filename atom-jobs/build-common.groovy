@@ -74,6 +74,7 @@ properties([
                         name: 'NEED_SOURCE_CODE',
                         defaultValue: false
                 ),
+    ])
 ])
 
 if (params.PRODUCT.length() <= 1) {
