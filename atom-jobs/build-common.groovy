@@ -69,8 +69,11 @@ properties([
                 booleanParam(
                         name: 'FAILPOINT',
                         defaultValue: false
-                )
-        ])
+                ),
+                booleanParam(
+                        name: 'NEED_SOURCE_CODE',
+                        defaultValue: false
+                ),
 ])
 
 if (params.PRODUCT.length() <= 1) {
@@ -562,8 +565,14 @@ mkdir ${TARGET}/bin
 """
 
 def packageBinary() {
+    // 是否和代码一起打包，可以手动设置 NEED_SOURCE_CODE=true
+    if (NEED_SOURCE_CODE) {
+        sh """
+        tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
+        curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
+        """
     //  pd,tidb,tidb-test 非release版本，和代码一起打包
-    if ((PRODUCT == "pd" || PRODUCT == "tidb" || PRODUCT == "tidb-test" ) && RELEASE_TAG.length() < 1) {
+    } else if ((PRODUCT == "pd" || PRODUCT == "tidb" || PRODUCT == "tidb-test" ) && RELEASE_TAG.length() < 1) {
         sh """
         tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
         curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
