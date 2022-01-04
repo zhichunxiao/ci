@@ -110,12 +110,14 @@ run_with_pod {
                         string(name: 'release_test__tidb_commit', value: GHPRB_ACTUAL_COMMIT),
                 ]
                 dir("${ws}/${TRIGGER_JOB_NAME}") {
-                       result = build(job: "${TRIGGER_JOB_NAME}", parameters: default_params, wait: true, propagate: false)
-                       buildResultInStr = result.getDescription()
-                       if (result.getResult() != "SUCCESS") {
-                           currentBuild.result = "FAILURE"
-                       }
-                       if (result.getDescription() != null && result.getDescription() != "") {
+                        result = build(job: "${TRIGGER_JOB_NAME}", parameters: default_params, wait: true, propagate: false)
+                        buildResultInStr = result.getDescription()
+                        if (result.getResult() != "SUCCESS") {
+                            currentBuild.result = "FAILURE"
+                        }
+                        if (TRIGGER_JOB_NAME in ["tidb_ghpr_integration_br_test", "tidb_ghpr_integration_cdc_test"]) {
+                            currentBuild.description = result.getDescription()
+                        } else if (result.getDescription() != null && result.getDescription() != "") {
                             println result.getDescription()
                             def jsonObj = readJSON text: result.getDescription()
                             writeJSON file: 'result.json', json: jsonObj, pretty: 4
@@ -127,7 +129,9 @@ run_with_pod {
                             archiveArtifacts artifacts: 'result.json', fingerprint: true
                             summary_info = parseBuildResult(jsonObj)
                             currentBuild.description = summary_info
-                       }
+                        } else {
+                            "println not found valid result contains subtask info"
+                        }
                 }
             }
         }  
