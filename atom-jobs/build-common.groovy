@@ -567,7 +567,7 @@ mkdir ${TARGET}/bin
 
 def packageBinary() {
     // 是否和代码一起打包，可以手动设置 NEED_SOURCE_CODE=true
-    if (NEED_SOURCE_CODE) {
+    if (params.NEED_SOURCE_CODE) {
         sh """
         tar --exclude=${TARGET}.tar.gz -czvf ${TARGET}.tar.gz *
         curl -F ${OUTPUT_BINARY}=@${TARGET}.tar.gz ${FILE_SERVER_URL}/upload
