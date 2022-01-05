@@ -115,9 +115,7 @@ run_with_pod {
                         if (result.getResult() != "SUCCESS") {
                             currentBuild.result = "FAILURE"
                         }
-                        if (TRIGGER_JOB_NAME in ["tidb_ghpr_integration_br_test", "tidb_ghpr_integration_cdc_test"]) {
-                            currentBuild.description = result.getDescription()
-                        } else if (result.getDescription() != null && result.getDescription() != "") {
+                        if (result.getDescription() != null && result.getDescription() != "") {
                             println result.getDescription()
                             def jsonObj = readJSON text: result.getDescription()
                             writeJSON file: 'result.json', json: jsonObj, pretty: 4
