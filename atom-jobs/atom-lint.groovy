@@ -151,9 +151,21 @@ try {
                 throw err
             } finally {
                 sh """
+                wget ${FILE_SERVER_URL}/download/rd-atom-agent/atom-lint/agent-lint.py
+                python3 agent-lint.py ${REPO}/${REPORT_DIR} || true
+
                 wget ${FILE_SERVER_URL}/download/rd-index-agent/repo_lint/tiinsight-agent-lint.py
                 python3 tiinsight-agent-lint.py ${REPO} ${BRANCH} ${COMMIT_ID} ${TASK_NAME} ${REPO}/${REPORT_DIR} ${BUILD_URL}
                 """
+                def exists = fileExists "test_summary.info"
+                if (exists) {
+                    ENV_TEST_SUMMARY = sh(script: "cat test_summary.info", returnStdout: true).trim()
+                    println ENV_TEST_SUMMARY
+                    currentBuild.description = "${ENV_TEST_SUMMARY}"
+                } else {
+                    println "file not exist: test_summary.info"
+                }
+                
                 junit(
                     allowEmptyResults: true,
                     testResults: "${REPO}/${REPORT_DIR}"
