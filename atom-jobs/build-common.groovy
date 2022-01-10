@@ -505,7 +505,11 @@ if [[ ! "0.8.0" > "\$grpcio_ver" ]]; then
     echo using gcc 8
     source /opt/rh/devtoolset-8/enable
 fi
-ROCKSDB_SYS_SSE=0 make release
+if [[ ${ARCH} == 'arm64']]; then
+    ROCKSDB_SYS_SSE=0 make release
+else
+    make release
+fi
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin
 cp target/release/tikv-importer ${TARGET}/bin
