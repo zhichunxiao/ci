@@ -82,11 +82,14 @@ if (PRODUCT == "tics" ) {
 // 定义非默认的构建镜像脚本
 buildImgagesh = [:]
 buildImgagesh["tics"] = """
-if [ ${RELEASE_TAG} == "" ];then  
-    while ! make image_tiflash_ci ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
+curl -o Dockerfile ${DOCKERFILE}
+if [[ ${RELEASE_TAG} == "" ]]; then
+    # No release tag, the image may be used in testings
+    docker build -t ${imagePlaceHolder} . --build-arg INSTALL_MYSQL=1
 else
-    while ! make image_tiflash_release ;do echo "fail @ `date "+%Y-%m-%d %H:%M:%S"`"; sleep 60; done
-fi;
+    # Release tag provided, do not install test utils
+    docker build -t ${imagePlaceHolder} . --build-arg INSTALL_MYSQL=0
+fi
 """
 
 buildImgagesh["monitoring"] = """

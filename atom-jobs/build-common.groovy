@@ -11,6 +11,7 @@
 * @FORCE_REBUILD(bool:if force rebuild binary,default true,Optional)
 * @FAILPOINT(bool:build failpoint binary or not,only for tidb,tikv,pd now ,default false,Optional)
 * @EDITION(enumerate:,community,enterprise,Required)
+* @UPDATE_TIFLASH_CACHE(bool: update ci build cache, for tiflash only, default false, Optional)
 */
 
 properties([
@@ -77,6 +78,10 @@ properties([
                 ),
                 booleanParam(
                         name: 'NEED_SOURCE_CODE',
+                        defaultValue: false
+                ),
+                booleanParam(
+                        name: 'UPDATE_TIFLASH_CACHE',
                         defaultValue: false
                 ),
     ])
@@ -460,11 +465,41 @@ if [ ${OS} == 'darwin' ]; then
     ls -l ./release-darwin/tiflash/
     mv release-darwin ${TARGET}
 else
-    NPROC=12 release-centos7/build/build-release.sh
-    mv release-centos7 ${TARGET}
+    # check if LLVM toolchain is provided
+    if [[ -d "release-centos7-llvm" && \$(which clang 2>/dev/null) ]]
+    then
+        NPROC=12 release-centos7-llvm/scripts/build-release.sh
+        mkdir -p ${TARGET}
+        mv release-centos7-llvm/tiflash ${TARGET}/tiflash
+    else
+        NPROC=12 release-centos7/build/build-release.sh
+        mkdir -p ${TARGET}
+        mv release-centos7/tiflash ${TARGET}/tiflash
+    fi
 fi
 rm -rf ${TARGET}/build-release || true
 """
+
+if (params.UPDATE_TIFLASH_CACHE) {
+    // override build script if this build is to update tiflash cache
+    buildsh["tics"] = """
+    if [[ -d "release-centos7-llvm" && \$(which clang 2>/dev/null) ]]
+    then
+        NPROC=12 CMAKE_BUILD_TYPE=RELWITHDEBINFO BUILD_BRANCH=${params.TARGET_BRANCH} BUILD_UPDATE_DEBUG_CI_CCACHE=true UPDATE_CCACHE=true release-centos7-llvm/scripts/build-tiflash-ci.sh
+        NPROC=12 CMAKE_BUILD_TYPE=Debug BUILD_BRANCH=${params.TARGET_BRANCH} UPDATE_CCACHE=true release-centos7-llvm/scripts/build-tiflash-ut-coverage.sh
+        mkdir -p ${TARGET}
+        mv release-centos7-llvm/tiflash ${TARGET}/tiflash
+    else
+        NPROC=12 CMAKE_BUILD_TYPE=RELWITHDEBINFO BUILD_BRANCH=${params.TARGET_BRANCH} BUILD_UPDATE_DEBUG_CI_CCACHE=true UPDATE_CCACHE=true release-centos7/build/build-tiflash-ci.sh
+        if [[ -f release-centos7/build/build-tiflash-ut-coverage.sh ]]
+        then
+            NPROC=12 CMAKE_BUILD_TYPE=Debug BUILD_BRANCH=${params.TARGET_BRANCH} UPDATE_CCACHE=true release-centos7/build/build-tiflash-ut-coverage.sh
+        fi
+        mkdir -p ${TARGET}
+        mv release-centos7/tiflash ${TARGET}/tiflash
+    fi
+    """
+}
 
 buildsh["tikv"] = """
 if [ ${RELEASE_TAG}x != ''x ];then
@@ -615,17 +650,29 @@ def packageBinary() {
     }
 }
 
-def release() {
+def release(product, label) {
     // if has built,skip build.
     if (ifFileCacheExists()) {
         return
     }
+
     checkoutCode()
-    // some build need this token.
-    withCredentials([string(credentialsId: 'sre-bot-token', variable: 'TOKEN')]) {
-        sh buildsh[params.PRODUCT]
+
+    if (PRODUCT == 'tics') {
+        if (fileExists('release-centos7-llvm/scripts/build-release.sh')) {
+            label = "tiflash-llvm"
+        }
     }
-    packageBinary()
+
+    if (label != '') {
+        container(label) {
+            sh buildsh[product]
+            packageBinary()
+        }
+    } else {
+        sh buildsh[product]
+        packageBinary()
+    }
 }
 
 
@@ -633,13 +680,7 @@ stage("Build ${PRODUCT}") {
     node(nodeLabel) {
         dir("go/src/github.com/pingcap/${PRODUCT}") {
             deleteDir()
-            if (containerLabel != "") {
-                container(containerLabel){
-                    release()
-                }
-            }else {
-                release()
-            }
+            release(PRODUCT, containerLabel)
         }
     }
 }
