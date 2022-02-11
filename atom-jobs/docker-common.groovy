@@ -116,7 +116,7 @@ docker build  -t ${imagePlaceHolder} .
 buildImgagesh["tidb"] = """
 cp /usr/local/go/lib/time/zoneinfo.zip ./
 rm -rf tidb-server
-cp bin/* ./
+cp bin/tidb-server ./
 curl -o Dockerfile ${DOCKERFILE}
 docker build  -t ${imagePlaceHolder} .
 """
