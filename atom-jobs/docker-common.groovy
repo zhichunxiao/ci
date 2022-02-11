@@ -187,6 +187,7 @@ def release_images() {
 }
 
 def release() {
+    deleteDir()
     download()
     build_image()
     release_images()
