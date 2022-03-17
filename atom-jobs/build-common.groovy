@@ -111,55 +111,47 @@ def ifFileCacheExists() {
     return false
 }
 
-@NonCPS
-boolean isMoreRecentOrEqual( String a, String b ) {
-    if (a == b) {
-        return true
-    }
-
-    [a,b]*.tokenize('.')*.collect { it as int }.with { u, v ->
-       Integer result = [u,v].transpose().findResult{ x,y -> x <=> y ?: null } ?: u.size() <=> v.size()
-       return (result == 1)
-    } 
-}
-
 // support branch example
 //  master | hz-poc
 //  relase-4.0
 //  release-4.0-20210812
 //  release-5.1
 //  release-5.3
-string trimPrefix = {
-        it.startsWith('release-') ? it.minus('release-').split("-")[0] : it 
-    }
 
 // choose which go version to use. 
-def boolean needUpgradeGoVersion(String tag,String branch) {
-    if (tag.startsWith("v") && tag > "v5.1") {
-        println "tag=${tag} need upgrade go version"
-        return true
+def String needUpgradeGoVersion(String tag,String branch) {
+    goVersion="go1.18"
+    if (tag.startsWith("v") && tag <= "v5.1") {
+        return "go1.13"
     }
-    if (branch.startsWith("master") || branch.startsWith("hz-poc") || branch.startsWith("main") || branch.startsWith("arm-dup") ) {
-        println "targetBranch=${branch} need upgrade go version"
-        return true
+    if (tag.startsWith("v") && tag > "v5.1" && tag < "v6.0") {
+        return "go1.16"
     }
-    if (branch.startsWith("release-")) {
-        if (isMoreRecentOrEqual(trimPrefix(branch), trimPrefix("release-5.1"))) {
-            println "targetBranch=${branch} need upgrade go version"
-            return true
-        }
+    if (branch.startsWith("release-") && branch < "release-5.1"){
+        return "go1.13"
+    }
+    if (branch.startsWith("release-") && branch >= "release-5.1" && branch < "release-6.0"){
+        return "go1.16"
+    }
+    if (branch.startsWith("hz-poc") || branch.startsWith("arm-dup") ) {
+        return "go1.16"
     }
     if (REPO == "tiem") {
-        return true
+        return "go1.16"
     }
-    return false
+    return "go1.18"
 }
 
-def goBuildPod = "${GO_BUILD_SLAVE}"
-def GO_BIN_PATH = "/usr/local/go/bin"
-if (needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH)) {
-   goBuildPod = "${GO1160_BUILD_SLAVE}"
-   GO_BIN_PATH = "/usr/local/go1.16.4/bin"
+def goBuildPod = "${GO1180_BUILD_SLAVE}"
+def GO_BIN_PATH = "/usr/local/go1.18/bin"
+goVersion = needUpgradeGoVersion(params.RELEASE_TAG,params.TARGET_BRANCH)
+if ( goVersion == "go1.16" ) {
+    goBuildPod = "${GO1160_BUILD_SLAVE}"
+    GO_BIN_PATH = "/usr/local/go1.16.4/bin"
+}
+if ( goVersion == "go1.13" ) {
+    goBuildPod = "${GO_BUILD_SLAVE}"
+    GO_BIN_PATH = "/usr/local/go/bin"
 }
 
 // choose which node to use.
@@ -258,6 +250,7 @@ buildsh["tidb-ctl"] = """
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 go build -o binarys/${PRODUCT}
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin
@@ -277,6 +270,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make clean
 git checkout .
 if [ ${failpoint} == 'true' ]; then
@@ -322,6 +316,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make clean
 git checkout .
 make
@@ -340,6 +335,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 git checkout .
 if [ ${EDITION} == 'enterprise' ]; then
     export PD_EDITION=Enterprise
@@ -364,6 +360,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make clean
 make build
 rm -rf ${TARGET}
@@ -381,6 +378,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make build
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
@@ -398,6 +396,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make dm
 ls -alh bin/
 rm -rf ${TARGET}
@@ -423,6 +422,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 if [ ${failpoint} == 'true' ]; then
     make failpoint-enable
 fi;
@@ -446,6 +446,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 if [ ${REPO} == "tidb" ]; then
     make build_dumpling
 else
@@ -466,6 +467,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make
 rm -rf ${TARGET}
 mkdir -p ${TARGET}/bin    
@@ -482,6 +484,7 @@ fi;
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make syncer
 make loader
 rm -rf ${TARGET}
@@ -621,6 +624,7 @@ buildsh["tiem"] = """
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 make build
 """
 
@@ -628,6 +632,7 @@ buildsh["tidb-test"] = """
 if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
     export PATH=${binPath}
 fi;
+go version
 if [ -d "partition_test/build.sh" ]; then
     cd partition_test
     bash build.sh
@@ -646,6 +651,10 @@ fi;
 """
 
 buildsh["enterprise-plugin"] = """
+if [[ ${ARCH} == 'arm64' ||  ${OS} == 'darwin' ]]; then
+    export PATH=${binPath}
+fi;
+go version
 cd ../
 rm -rf tidb
 git clone --depth 1 https://github.com/pingcap/tidb.git
