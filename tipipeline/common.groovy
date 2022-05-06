@@ -75,7 +75,7 @@ class PipelineSpec {
     TaskSpec[] tasks;
 }
 
-PIPELINE_RUN_API_ENDPOINT = "http://172.16.5.15:30792/pipelinerun"
+PIPELINE_RUN_API_ENDPOINT = "http://172.16.5.13:30792/pipelinerun"
 
 def loadPipelineConfig(fileURL, pullRequestAuthor, triggerAuthor) {
     ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory())
