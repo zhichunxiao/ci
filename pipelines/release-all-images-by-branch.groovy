@@ -61,6 +61,9 @@ if (GIT_BRANCH.startsWith("release-")) {
 
 def get_sha(repo) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
+    if (repo == 'ng-monitoring') {
+        GIT_BRANCH = "main"
+    }
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${GIT_BRANCH} -s=${FILE_SERVER_URL}").trim()
 }
 
@@ -598,18 +601,20 @@ retry(2) {
                         release_one_normal(product)
                     }
                 }
-                releaseReposMultiArch = ["tidb", "tikv", "pd", "br", "tidb-lightning", "ticdc", "dumpling", "tidb-binlog"]
-                if ("${GIT_BRANCH}" >= "release-5.3" || "${GIT_BRANCH}" == "master") {
-                    releaseReposMultiArch = ["tidb", "tikv", "pd", "br", "tidb-lightning", "ticdc", "dumpling", "tidb-binlog", "dm"]
+            }
+            releaseReposMultiArch = ["tidb", "tikv", "pd", "br", "tidb-lightning", "ticdc", "dumpling", "tidb-binlog"]
+            if ("${GIT_BRANCH}" >= "release-5.3" || "${GIT_BRANCH}" == "master") {
+                releaseReposMultiArch = ["tidb", "tikv", "pd", "br", "tidb-lightning", "ticdc", "dumpling", "tidb-binlog", "dm", "ng-monitoring"]
+            }
+            for (item in releaseReposMultiArch) {
+                def String product = "${item}"
+                def String stageName = "${product}-multi-arch"
+                if (!params.NEED_MULTIARCH) {
+                    stageName = "${product}"
                 }
-                for (item in releaseReposMultiArch) {
-                    def String product = "${item}"
-                    def String stageName = "${product}-multi-arch"
-                    if (!params.NEED_MULTIARCH) {
-                        stageName = "${product}"
-                    }
-                    builds[stageName] = {
-                        release_one_normal(product)
+                builds[stageName] = {
+                    release_one_normal(product)
+                    if (product != "ng-monitoring") {
                         release_one_debug(product)
                     }
                 }
