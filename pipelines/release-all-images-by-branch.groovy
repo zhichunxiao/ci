@@ -61,7 +61,7 @@ if (GIT_BRANCH.startsWith("release-")) {
 
 def get_sha(repo) {
     sh "curl -s ${FILE_SERVER_URL}/download/builds/pingcap/ee/get_hash_from_github.py > gethash.py"
-    if (repo == 'ng-monitoring') {
+    if (repo == "ng-monitoring" && GIT_BRANCH=="master") {
         GIT_BRANCH = "main"
     }
     return sh(returnStdout: true, script: "python gethash.py -repo=${repo} -version=${GIT_BRANCH} -s=${FILE_SERVER_URL}").trim()
@@ -315,7 +315,6 @@ manifests:
     platform:
     architecture: amd64
     os: linux
-
 EOF
                     cat manifest-${repo}-${GIT_BRANCH}.yaml
                     curl -o manifest-tool ${FILE_SERVER_URL}/download/cicd/tools/manifest-tool-linux-amd64
@@ -338,7 +337,6 @@ manifests:
     platform:
     architecture: amd64
     os: linux
-
 EOF
                         cat manifest-${repo}-${GIT_BRANCH}.yaml
                         curl -o manifest-tool ${FILE_SERVER_URL}/download/cicd/tools/manifest-tool-linux-amd64
@@ -568,7 +566,6 @@ manifests:
     platform:
     architecture: amd64
     os: linux
-
 EOF
                     cat manifest-monitoring-master.yaml
                     curl -o manifest-tool ${FILE_SERVER_URL}/download/cicd/tools/manifest-tool-linux-amd64
