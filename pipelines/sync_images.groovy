@@ -1,3 +1,5 @@
+// Script transferred
+
 pipeline {
     agent {label 'jenkins-image-syncer'}
 
