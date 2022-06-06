@@ -39,14 +39,8 @@ pipeline {
         }
         stage('Sync Image') {
             steps {
-                // sh """
-                // ./regctl-linux-amd64 image copy ${SOURCE_IMAGE} ${TARGET_IMAGE} -v info
-                // """
                 sh """
-                    
-                    for i in '1 2 3'
-                    echo $i
-                    done
+                ./regctl-linux-amd64 image copy ${SOURCE_IMAGE} ${TARGET_IMAGE} -v info
                 """
             }
         }
