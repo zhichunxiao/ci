@@ -37,11 +37,26 @@ pipeline {
                 """
             }
         }
+
+
         stage('Sync Image') {
+
             steps {
-                sh """
-                ./regctl-linux-amd64 image copy ${SOURCE_IMAGE} ${TARGET_IMAGE} -v info
-                """
+	        script {
+
+	            def component = "br"
+                    def cmd = "curl -L -s https://registry.hub.docker.com/v1/repositories/pingcap/$component/tags | json_reformat | grep -i name | awk '{print \$2}' | sed 's/\"//g' | sort -u"
+                    def tags = sh(returnStdout: true, script: "$cmd").trim()
+                    println "$tags"
+                    
+		    for (tag in "$tags") {
+		        def SOURCE_IMAGE = "${SOURCE_IMAGE}" + tag
+			def TARGET_IMAGE = "${TARGET_IMAGE}" + tag
+			sh """
+                        ./regctl-linux-amd64 image copy ${SOURCE_IMAGE} ${TARGET_IMAGE} -v info
+                        """
+		    }
+		}
             }
         }
     }
